@@ -1,0 +1,13 @@
+{
+  "name": "Sinnesdetektiv",
+  "short_name": "Sinnesdetektiv",
+  "start_url": "/Sinnesdetektiv/",
+  "scope": "/Sinnesdetektiv/",
+  "display": "standalone",
+  "background_color": "#0d1117",
+  "theme_color": "#58a6ff",
+  "icons": [
+    {"src": "SinnesLogo.png", "sizes": "192x192", "type": "image/png"},
+    {"src": "SinnesLogo.png", "sizes": "512x512", "type": "image/png"}
+  ]
+}
