@@ -47,6 +47,7 @@ body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-
 .btn-primary{background:linear-gradient(135deg,#1f6feb,#388bfd);color:white;border:none;border-radius:12px;padding:.8rem 2.5rem;font-family:'Nunito',sans-serif;font-size:1rem;font-weight:800;cursor:pointer;transition:all .2s;box-shadow:0 4px 20px rgba(31,111,235,.4);}
 .btn-primary:hover{transform:translateY(-2px);}
 .btn-primary:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn-primary.dimmed{opacity:.4;cursor:default;box-shadow:none;}
 
 /* CONTENT */
 #contentScreen{display:none;min-height:100vh;padding:1.25rem 1rem 5rem;max-width:700px;margin:0 auto;}
@@ -189,7 +190,7 @@ body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-
       <input type="date" id="dateIn">
     </div>
   </div>
-  <button class="btn-primary" id="startBtn" disabled onclick="go()">Los geht's →</button>
+  <button class="btn-primary" id="startBtn" onclick="go()">Los geht's →</button>
 </div>
 
 <!-- CONTENT -->
@@ -215,12 +216,17 @@ let saved={
 
 function checkBtn(){
   const v=document.getElementById("nameIn").value.trim();
-  document.getElementById("startBtn").disabled = v.length < 2;
+  const btn=document.getElementById("startBtn");
+  if(v.length < 2){ btn.classList.add("dimmed"); } else { btn.classList.remove("dimmed"); }
 }
 
 function go(){
   const nameVal = document.getElementById("nameIn").value.trim();
-  if(nameVal.length < 2){ document.getElementById("nameIn").focus(); return; }
+  if(nameVal.length < 2){
+    document.getElementById("nameIn").style.borderColor="#f78166";
+    document.getElementById("nameIn").focus();
+    return;
+  }
   sName = nameVal;
   sClass = document.getElementById("classIn").value.trim() || "-";
   const d = document.getElementById("dateIn").value;
@@ -241,9 +247,8 @@ window.addEventListener("DOMContentLoaded", function(){
   ["input","keyup","change","paste"].forEach(ev => ni.addEventListener(ev, checkBtn));
   ni.addEventListener("keydown", e => { if(e.key==="Enter") go(); });
 
-  // Remove disabled so button works even if JS check fails
-  document.getElementById("startBtn").removeAttribute("disabled");
-  document.getElementById("startBtn").addEventListener("click", go);
+  // Visual dimming via class (not disabled attribute)
+  checkBtn();
 });
 
 // ── steps ──
