@@ -213,17 +213,26 @@ let saved={
   hypChoice:""
 };
 
-document.getElementById("nameIn").addEventListener("input",function(){
-  document.getElementById("startBtn").disabled=this.value.trim().length<2;
-});
-document.getElementById("nameIn").addEventListener("keydown",e=>{if(e.key==="Enter")go();});
+// Set today's date
+(function(){
+  const di=document.getElementById("dateIn");
+  const t=new Date();
+  di.value=t.getFullYear()+"-"+String(t.getMonth()+1).padStart(2,"0")+"-"+String(t.getDate()).padStart(2,"0");
+})();
+
+function checkBtn(){
+  document.getElementById("startBtn").disabled=document.getElementById("nameIn").value.trim().length<2;
+}
+const ni=document.getElementById("nameIn");
+["input","keyup","change","paste"].forEach(ev=>ni.addEventListener(ev,checkBtn));
+ni.addEventListener("keydown",e=>{if(e.key==="Enter")go();});
 
 function go(){
   sName=document.getElementById("nameIn").value.trim();
-  sClass=document.getElementById("classIn").value.trim()||"–";
+  if(sName.length<2){document.getElementById("nameIn").focus();return;}
+  sClass=document.getElementById("classIn").value.trim()||"-";
   const d=document.getElementById("dateIn").value;
   sDate=d?new Date(d).toLocaleDateString("de-DE"):new Date().toLocaleDateString("de-DE");
-  if(sName.length<2)return;
   document.getElementById("startScreen").style.display="none";
   document.getElementById("contentScreen").style.display="block";
   render();
