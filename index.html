@@ -3,622 +3,998 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sinnesdetektiv 🔍</title>
-<meta property="og:title" content="Sinnesdetektiv">
-<meta property="og:description" content="Entdecke deine Sinnesorgane – Texte, Aufgaben & Experimente">
-<meta property="og:type" content="website">
-<link rel="manifest" href="manifest.json">
-<link rel="apple-touch-icon" href="SinnesLogo.png">
+<title>Sinnesdetektiv – Das Auge 👁️</title>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
 :root {
-  --bg: #0d1117; --surface: #161b22; --surface2: #1e2530;
-  --border: #30363d; --accent: #58a6ff; --accent2: #3fb950;
-  --accent3: #f78166; --accent4: #d2a8ff; --accent5: #ffa657;
-  --text: #e6edf3; --text2: #8b949e; --radius: 16px;
+  --bg:#0d1117; --surface:#161b22; --surface2:#1e2530;
+  --border:#30363d; --accent:#58a6ff; --accent2:#3fb950;
+  --accent3:#f78166; --accent4:#d2a8ff; --accent5:#ffa657;
+  --text:#e6edf3; --text2:#8b949e; --radius:16px;
 }
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
 
-/* START */
-#startScreen { min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:2rem; background:radial-gradient(ellipse at 30% 20%, #1a2744 0%, #0d1117 60%); text-align:center; }
-.logo-circle { width:120px;height:120px;border-radius:50%;background:linear-gradient(135deg,#1e3a5f,#2d5a8e);border:3px solid var(--accent);display:flex;align-items:center;justify-content:center;font-size:3.5rem;margin-bottom:1.5rem;box-shadow:0 0 40px rgba(88,166,255,.3);animation:pulse 3s ease-in-out infinite; }
-@keyframes pulse { 0%,100%{box-shadow:0 0 40px rgba(88,166,255,.3)}50%{box-shadow:0 0 60px rgba(88,166,255,.5)} }
-#startScreen h1 { font-family:'Outfit',sans-serif;font-size:clamp(2rem,6vw,3.5rem);font-weight:800;background:linear-gradient(135deg,#58a6ff,#d2a8ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:.5rem; }
-#startScreen p { color:var(--text2);font-size:1.1rem;margin-bottom:2rem;max-width:400px; }
-.name-input-wrap { background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:2rem;width:100%;max-width:420px;margin-bottom:1.5rem; }
-.name-input-wrap label { display:block;font-weight:700;margin-bottom:.75rem;color:var(--accent); }
-.name-input-wrap input { width:100%;padding:.85rem 1rem;border-radius:10px;border:2px solid var(--border);background:var(--surface2);color:var(--text);font-family:'Nunito',sans-serif;font-size:1.05rem;outline:none;transition:border-color .2s; }
-.name-input-wrap input:focus { border-color:var(--accent); }
-.btn-primary { background:linear-gradient(135deg,#1f6feb,#388bfd);color:white;border:none;border-radius:12px;padding:.9rem 2.5rem;font-family:'Nunito',sans-serif;font-size:1.1rem;font-weight:800;cursor:pointer;transition:all .2s;box-shadow:0 4px 20px rgba(31,111,235,.4); }
-.btn-primary:hover { transform:translateY(-2px);box-shadow:0 6px 25px rgba(31,111,235,.5); }
-.btn-primary:disabled { opacity:.4;cursor:not-allowed;transform:none; }
+/* ── FULLSCREEN OVERLAY ── */
+#imgOverlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:9999;cursor:zoom-out;align-items:center;justify-content:center;}
+#imgOverlay.show{display:flex;}
+#imgOverlay img{max-width:95vw;max-height:95vh;border-radius:12px;box-shadow:0 0 60px rgba(88,166,255,.3);}
+#imgOverlay .close-hint{position:absolute;top:1rem;right:1.5rem;color:#8b949e;font-size:.9rem;}
 
-/* MODULES */
-#moduleScreen { display:none;min-height:100vh;padding:2rem 1rem;max-width:700px;margin:0 auto; }
-.top-bar { display:flex;align-items:center;justify-content:space-between;margin-bottom:2rem;flex-wrap:wrap;gap:.5rem; }
-.top-bar h2 { font-family:'Outfit',sans-serif;font-weight:800;font-size:1.5rem; }
-.player-badge { background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:.4rem 1rem;font-size:.9rem;color:var(--text2); }
-.modules-grid { display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1rem; }
-.module-card { background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem;cursor:pointer;transition:all .2s;position:relative;overflow:hidden; }
-.module-card:hover { border-color:var(--accent);transform:translateY(-2px); }
-.module-card.completed { border-color:var(--accent2); }
-.module-card::before { content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--card-color,var(--accent)); }
-.module-icon { font-size:2.5rem;margin-bottom:.75rem; }
-.module-title { font-family:'Outfit',sans-serif;font-weight:700;font-size:1.15rem;margin-bottom:.25rem; }
-.module-desc { color:var(--text2);font-size:.9rem; }
-.module-status { margin-top:.75rem;font-size:.85rem;font-weight:700; }
-.status-done { color:var(--accent2); } .status-open { color:var(--text2); }
-.highscore-btn { background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:.6rem 1.2rem;color:var(--text);font-family:'Nunito',sans-serif;font-weight:700;cursor:pointer;font-size:.9rem; }
+/* ── START ── */
+#startScreen{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem;background:radial-gradient(ellipse at 30% 20%,#1a2744 0%,#0d1117 60%);text-align:center;}
+.logo-circle{width:110px;height:110px;border-radius:50%;background:linear-gradient(135deg,#1e3a5f,#2d5a8e);border:3px solid var(--accent);display:flex;align-items:center;justify-content:center;font-size:3rem;margin-bottom:1.5rem;box-shadow:0 0 40px rgba(88,166,255,.3);animation:pulse 3s ease-in-out infinite;}
+@keyframes pulse{0%,100%{box-shadow:0 0 40px rgba(88,166,255,.3)}50%{box-shadow:0 0 60px rgba(88,166,255,.5)}}
+#startScreen h1{font-family:'Outfit',sans-serif;font-size:clamp(1.8rem,5vw,3rem);font-weight:800;background:linear-gradient(135deg,#58a6ff,#d2a8ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:.5rem;}
+#startScreen p{color:var(--text2);margin-bottom:2rem;max-width:380px;line-height:1.6;}
+.name-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.75rem;width:100%;max-width:400px;margin-bottom:1.5rem;}
+.name-box label{display:block;font-weight:700;margin-bottom:.6rem;color:var(--accent);font-size:.95rem;}
+.name-box input{width:100%;padding:.8rem 1rem;border-radius:10px;border:2px solid var(--border);background:var(--surface2);color:var(--text);font-family:'Nunito',sans-serif;font-size:1rem;outline:none;transition:border-color .2s;}
+.name-box input:focus{border-color:var(--accent);}
+.name-box .class-row{display:flex;gap:.75rem;margin-top:.75rem;}
+.name-box .class-row input{flex:1;}
+.btn-primary{background:linear-gradient(135deg,#1f6feb,#388bfd);color:white;border:none;border-radius:12px;padding:.85rem 2.5rem;font-family:'Nunito',sans-serif;font-size:1.05rem;font-weight:800;cursor:pointer;transition:all .2s;box-shadow:0 4px 20px rgba(31,111,235,.4);}
+.btn-primary:hover{transform:translateY(-2px);}
+.btn-primary:disabled{opacity:.4;cursor:not-allowed;transform:none;}
 
-/* CONTENT */
-#contentScreen { display:none;min-height:100vh;padding:1.5rem 1rem 4rem;max-width:700px;margin:0 auto; }
-.content-header { display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem;flex-wrap:wrap; }
-.back-btn { background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:.5rem 1rem;color:var(--text);font-family:'Nunito',sans-serif;cursor:pointer;font-size:.9rem; }
-.progress-bar-wrap { flex:1;background:var(--surface);border-radius:10px;height:8px;overflow:hidden;min-width:100px; }
-.progress-bar-fill { height:100%;background:linear-gradient(90deg,var(--accent),var(--accent4));border-radius:10px;transition:width .4s ease; }
+/* ── CONTENT ── */
+#contentScreen{display:none;min-height:100vh;padding:1.5rem 1rem 5rem;max-width:720px;margin:0 auto;}
+.top-header{display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem;flex-wrap:wrap;}
+.back-btn{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:.45rem .9rem;color:var(--text);font-family:'Nunito',sans-serif;cursor:pointer;font-size:.9rem;}
+.prog-wrap{flex:1;background:var(--surface);border-radius:10px;height:8px;overflow:hidden;min-width:80px;}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent4));border-radius:10px;transition:width .4s ease;}
+.prog-label{font-size:.8rem;color:var(--text2);white-space:nowrap;}
+.module-tag{background:rgba(88,166,255,.1);border:1px solid rgba(88,166,255,.3);border-radius:20px;padding:.3rem .8rem;font-size:.8rem;color:var(--accent);font-weight:700;}
 
-/* CARDS */
-.step-card { background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.75rem;margin-bottom:1rem;animation:slideIn .3s ease; }
-@keyframes slideIn { from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)} }
-.step-label { display:inline-flex;align-items:center;gap:.4rem;background:var(--surface2);border-radius:20px;padding:.3rem .9rem;font-size:.8rem;font-weight:700;color:var(--accent);margin-bottom:1rem;text-transform:uppercase;letter-spacing:.05em; }
-.step-card h3 { font-family:'Outfit',sans-serif;font-weight:700;font-size:1.2rem;margin-bottom:1rem; }
-.step-card p, .step-card li { line-height:1.75;color:var(--text2);margin-bottom:.5rem; }
-.step-card strong { color:var(--text); }
-.step-card ul, .step-card ol { padding-left:1.25rem;margin:.5rem 0; }
-.info-box { background:rgba(88,166,255,.08);border-left:3px solid var(--accent);border-radius:0 8px 8px 0;padding:.75rem 1rem;margin:.75rem 0;color:var(--text2);font-size:.95rem; }
+/* ── CARDS ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.75rem;margin-bottom:1rem;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.step-badge{display:inline-flex;align-items:center;gap:.35rem;background:var(--surface2);border-radius:20px;padding:.25rem .85rem;font-size:.78rem;font-weight:700;color:var(--accent);margin-bottom:1rem;text-transform:uppercase;letter-spacing:.04em;}
+.card h3{font-family:'Outfit',sans-serif;font-weight:700;font-size:1.2rem;margin-bottom:1rem;}
+.card p,.card li{line-height:1.8;color:var(--text2);margin-bottom:.4rem;}
+.card strong{color:var(--text);}
+.card ul,.card ol{padding-left:1.2rem;margin:.5rem 0;}
+.info-box{background:rgba(88,166,255,.07);border-left:3px solid var(--accent);border-radius:0 8px 8px 0;padding:.75rem 1rem;margin:.75rem 0;color:var(--text2);font-size:.93rem;}
+.warn-box{background:rgba(255,166,87,.07);border-left:3px solid var(--accent5);border-radius:0 8px 8px 0;padding:.75rem 1rem;margin:.75rem 0;color:var(--text2);font-size:.93rem;}
+.success-box{background:rgba(63,185,80,.07);border-left:3px solid var(--accent2);border-radius:0 8px 8px 0;padding:.75rem 1rem;margin:.75rem 0;color:var(--text2);font-size:.93rem;}
 
-/* ZUORDNUNG */
-.term-chips { display:flex;flex-wrap:wrap;gap:.5rem;margin:1rem 0; }
-.term-chip { background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:.4rem .9rem;font-size:.9rem;cursor:pointer;transition:all .2s;user-select:none; }
-.term-chip:hover { border-color:var(--accent);color:var(--accent); }
-.term-chip.selected { background:rgba(88,166,255,.15);border-color:var(--accent);color:var(--accent); }
-.term-chip.used { opacity:.3;cursor:not-allowed;pointer-events:none; }
-.drop-zone { background:var(--surface2);border:2px dashed var(--border);border-radius:8px;padding:.5rem .75rem;margin-bottom:.5rem;min-height:42px;display:flex;align-items:center;gap:.5rem;transition:all .2s;font-size:.9rem;cursor:pointer; }
-.drop-zone:hover { border-color:var(--accent); }
-.drop-zone.correct { border-color:var(--accent2);background:rgba(63,185,80,.1);color:var(--accent2); }
-.drop-zone.wrong { border-color:var(--accent3);background:rgba(247,129,102,.1);color:var(--accent3); }
-.drop-zone .zone-label { color:var(--text2);font-size:.85rem;flex:1; }
+/* ── IMAGE ── */
+.img-container{margin:1.25rem 0;text-align:center;}
+.img-container img{max-width:100%;border-radius:10px;cursor:zoom-in;border:1px solid var(--border);transition:transform .2s,box-shadow .2s;}
+.img-container img:hover{transform:scale(1.01);box-shadow:0 4px 24px rgba(88,166,255,.2);}
+.img-hint{font-size:.78rem;color:var(--text2);margin-top:.4rem;}
 
-/* QUIZ */
-.quiz-question { font-weight:700;font-size:1.05rem;margin-bottom:1rem;line-height:1.5; }
-.answer-options { display:flex;flex-direction:column;gap:.6rem; }
-.answer-btn { background:var(--surface2);border:2px solid var(--border);border-radius:10px;padding:.85rem 1.1rem;text-align:left;color:var(--text);font-family:'Nunito',sans-serif;font-size:.95rem;cursor:pointer;transition:all .15s;line-height:1.4; }
-.answer-btn:hover:not(:disabled) { border-color:var(--accent);background:rgba(88,166,255,.08); }
-.answer-btn.correct { border-color:var(--accent2);background:rgba(63,185,80,.12);color:var(--accent2); }
-.answer-btn.wrong { border-color:var(--accent3);background:rgba(247,129,102,.12);color:var(--accent3); }
-.feedback-box { margin-top:.75rem;padding:.75rem 1rem;border-radius:8px;font-weight:600;font-size:.95rem;display:none; }
-.feedback-box.show { display:block; }
-.feedback-box.correct { background:rgba(63,185,80,.1);color:var(--accent2);border:1px solid var(--accent2); }
-.feedback-box.wrong { background:rgba(247,129,102,.1);color:var(--accent3);border:1px solid var(--accent3); }
+/* ── VIDEO ── */
+.video-wrap{position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:10px;margin:1rem 0;border:1px solid var(--border);}
+.video-wrap iframe{position:absolute;top:0;left:0;width:100%;height:100%;}
 
-/* EXPERIMENT */
-.experiment-phase { border-left:3px solid var(--accent5);padding-left:1rem;margin-bottom:1.25rem; }
-.experiment-phase h4 { font-weight:700;color:var(--accent5);margin-bottom:.5rem;font-size:.9rem;text-transform:uppercase;letter-spacing:.05em; }
-.steps-list { list-style:none;counter-reset:steps; }
-.steps-list li { counter-increment:steps;display:flex;gap:.75rem;margin-bottom:.75rem;color:var(--text2);line-height:1.6; }
-.steps-list li::before { content:counter(steps);background:var(--accent5);color:white;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700;flex-shrink:0;margin-top:2px; }
-.textarea-wrap textarea { width:100%;padding:.85rem 1rem;border-radius:10px;border:2px solid var(--border);background:var(--surface2);color:var(--text);font-family:'Nunito',sans-serif;font-size:.95rem;resize:vertical;min-height:90px;outline:none;transition:border-color .2s;line-height:1.6; }
-.textarea-wrap textarea:focus { border-color:var(--accent); }
-.word-counter { text-align:right;font-size:.8rem;color:var(--text2);margin-top:.25rem; }
-.word-counter.ok { color:var(--accent2); }
+/* ── ZUORDNUNG ── */
+.zuordnung-area{display:flex;flex-direction:column;gap:1rem;margin:1rem 0;}
+.term-pool{display:flex;flex-wrap:wrap;gap:.5rem;padding:1rem;background:var(--surface2);border-radius:10px;border:1px solid var(--border);min-height:50px;}
+.term-pool-label{font-size:.8rem;color:var(--text2);margin-bottom:.5rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;}
+.term-chip{background:var(--surface);border:1.5px solid var(--accent);border-radius:20px;padding:.35rem .85rem;font-size:.88rem;cursor:pointer;transition:all .2s;user-select:none;color:var(--accent);}
+.term-chip:hover{background:rgba(88,166,255,.12);}
+.term-chip.selected{background:rgba(88,166,255,.2);box-shadow:0 0 0 2px var(--accent);}
+.term-chip.used{opacity:.25;cursor:not-allowed;pointer-events:none;}
+.slots-list{display:flex;flex-direction:column;gap:.5rem;}
+.slot-row{display:flex;align-items:center;gap:.75rem;background:var(--surface2);border-radius:8px;padding:.6rem .85rem;border:2px dashed var(--border);cursor:pointer;transition:all .2s;font-size:.9rem;}
+.slot-row:hover{border-color:var(--accent);}
+.slot-row.correct{border-color:var(--accent2);background:rgba(63,185,80,.08);border-style:solid;}
+.slot-row.wrong{border-color:var(--accent3);background:rgba(247,129,102,.08);border-style:solid;}
+.slot-num{font-size:.78rem;font-weight:700;color:var(--text2);min-width:18px;}
+.slot-label{flex:1;color:var(--text2);font-size:.85rem;}
+.slot-value{font-weight:700;font-size:.9rem;}
+
+/* ── QUIZ ── */
+.quiz-q{font-weight:700;font-size:1rem;margin-bottom:.85rem;line-height:1.5;}
+.options{display:flex;flex-direction:column;gap:.5rem;}
+.opt-btn{background:var(--surface2);border:2px solid var(--border);border-radius:10px;padding:.8rem 1rem;text-align:left;color:var(--text);font-family:'Nunito',sans-serif;font-size:.93rem;cursor:pointer;transition:all .15s;line-height:1.4;}
+.opt-btn:hover:not(:disabled){border-color:var(--accent);background:rgba(88,166,255,.07);}
+.opt-btn.correct{border-color:var(--accent2);background:rgba(63,185,80,.1);color:var(--accent2);}
+.opt-btn.wrong{border-color:var(--accent3);background:rgba(247,129,102,.1);color:var(--accent3);}
+.fb{margin-top:.6rem;padding:.65rem .9rem;border-radius:8px;font-weight:600;font-size:.9rem;display:none;}
+.fb.show{display:block;}
+.fb.correct{background:rgba(63,185,80,.08);color:var(--accent2);border:1px solid var(--accent2);}
+.fb.wrong{background:rgba(247,129,102,.08);color:var(--accent3);border:1px solid var(--accent3);}
+
+/* ── EXPERIMENT ── */
+.exp-phase{margin-bottom:1.5rem;}
+.phase-title{font-weight:800;font-size:.82rem;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.6rem;display:flex;align-items:center;gap:.4rem;}
+
+/* Checklist */
+.checklist{display:flex;flex-direction:column;gap:.5rem;margin:.5rem 0;}
+.check-item{display:flex;align-items:flex-start;gap:.75rem;padding:.7rem .85rem;background:var(--surface2);border-radius:8px;border:1px solid var(--border);cursor:pointer;transition:all .2s;}
+.check-item.done{background:rgba(63,185,80,.06);border-color:rgba(63,185,80,.3);}
+.check-item input[type=checkbox]{width:18px;height:18px;accent-color:var(--accent2);cursor:pointer;flex-shrink:0;margin-top:2px;}
+.check-item .step-text{color:var(--text2);font-size:.92rem;line-height:1.55;}
+.check-item.done .step-text{color:var(--text2);opacity:.7;}
+.check-item strong{color:var(--text);}
+
+/* Helper words */
+.helper-words{display:flex;flex-wrap:wrap;gap:.4rem;margin:.5rem 0 .75rem;}
+.helper-word{background:rgba(210,168,255,.08);border:1px solid rgba(210,168,255,.25);border-radius:6px;padding:.25rem .65rem;font-size:.82rem;color:var(--accent4);cursor:pointer;transition:all .2s;}
+.helper-word:hover{background:rgba(210,168,255,.15);}
+
+/* Textarea */
+.field-wrap{margin:.5rem 0;}
+.field-wrap label{display:block;font-size:.85rem;font-weight:700;color:var(--text2);margin-bottom:.4rem;}
+.field-wrap textarea{width:100%;padding:.75rem .9rem;border-radius:10px;border:2px solid var(--border);background:var(--surface2);color:var(--text);font-family:'Nunito',sans-serif;font-size:.93rem;resize:vertical;min-height:80px;outline:none;transition:border-color .2s;line-height:1.6;}
+.field-wrap textarea:focus{border-color:var(--accent);}
+.field-wrap .hint{font-size:.78rem;color:var(--text2);margin-top:.25rem;font-style:italic;}
+
+/* Hypothesis shown */
+.hyp-display{background:rgba(210,168,255,.06);border:1px solid rgba(210,168,255,.2);border-radius:10px;padding:1rem 1.1rem;margin:.75rem 0;}
+.hyp-display .hyp-label{font-size:.78rem;font-weight:700;color:var(--accent4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:.35rem;}
+.hyp-display .hyp-text{color:var(--text2);font-style:italic;line-height:1.6;}
+
+/* Unlock animation */
+.unlock-reveal{animation:unlockPop .4s ease;}
+@keyframes unlockPop{0%{opacity:0;transform:scale(.95)}100%{opacity:1;transform:scale(1)}}
 
 /* BUTTONS */
-.btn-next { background:linear-gradient(135deg,#238636,#2ea043);color:white;border:none;border-radius:10px;padding:.75rem 1.75rem;font-family:'Nunito',sans-serif;font-size:1rem;font-weight:700;cursor:pointer;transition:all .2s; }
-.btn-next:hover { transform:translateY(-1px); }
-.btn-next:disabled { opacity:.3;cursor:not-allowed;transform:none; }
-.nav-buttons { display:flex;gap:.75rem;margin-top:1.25rem;flex-wrap:wrap; }
+.btn-save{background:linear-gradient(135deg,#1f6feb,#388bfd);color:white;border:none;border-radius:10px;padding:.65rem 1.5rem;font-family:'Nunito',sans-serif;font-size:.93rem;font-weight:700;cursor:pointer;transition:all .2s;margin-top:.6rem;}
+.btn-save:hover{transform:translateY(-1px);}
+.btn-next{background:linear-gradient(135deg,#238636,#2ea043);color:white;border:none;border-radius:10px;padding:.75rem 1.75rem;font-family:'Nunito',sans-serif;font-size:1rem;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn-next:hover{transform:translateY(-1px);}
+.btn-pdf{background:linear-gradient(135deg,#6e40c9,#8957e5);color:white;border:none;border-radius:10px;padding:.75rem 1.75rem;font-family:'Nunito',sans-serif;font-size:1rem;font-weight:700;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:.5rem;}
+.btn-pdf:hover{transform:translateY(-1px);}
+.nav-row{display:flex;gap:.75rem;margin-top:1.25rem;flex-wrap:wrap;align-items:center;}
 
 /* COMPLETION */
-.completion-card { background:linear-gradient(135deg,var(--surface),var(--surface2));border:1px solid var(--accent2);border-radius:var(--radius);padding:2.5rem;text-align:center; }
-.completion-card .big-icon { font-size:4rem;margin-bottom:1rem; }
-.completion-card h2 { font-family:'Outfit',sans-serif;font-size:1.75rem;font-weight:800;margin-bottom:.5rem; }
-.completion-card p { color:var(--text2);margin-bottom:1.5rem; }
-.score-display { background:var(--surface2);border-radius:12px;padding:1rem;margin-bottom:1.5rem; }
-.score-num { font-size:3rem;font-weight:900;font-family:'Outfit',sans-serif;color:var(--accent2);line-height:1; }
-.score-label { color:var(--text2);font-size:.9rem; }
+.completion-card{background:linear-gradient(135deg,var(--surface),var(--surface2));border:1px solid var(--accent2);border-radius:var(--radius);padding:2.5rem;text-align:center;}
+.completion-card .big-icon{font-size:4rem;margin-bottom:1rem;}
+.completion-card h2{font-family:'Outfit',sans-serif;font-size:1.75rem;font-weight:800;margin-bottom:.5rem;}
+.score-ring{font-size:3rem;font-weight:900;font-family:'Outfit',sans-serif;color:var(--accent2);}
 
-/* HIGHSCORE */
-#highscoreScreen { display:none;min-height:100vh;padding:1.5rem 1rem 4rem;max-width:700px;margin:0 auto; }
-.tabs { display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:1.25rem; }
-.tab-btn { background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:.4rem .85rem;color:var(--text2);font-family:'Nunito',sans-serif;font-size:.85rem;cursor:pointer;transition:all .2s; }
-.tab-btn.active { background:var(--accent);border-color:var(--accent);color:white; }
-.hs-table { width:100%;border-collapse:collapse; }
-.hs-table th { text-align:left;padding:.6rem .75rem;font-size:.8rem;color:var(--text2);text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border); }
-.hs-table td { padding:.75rem;border-bottom:1px solid var(--surface2);font-size:.95rem; }
-.hs-table tr:hover td { background:var(--surface2); }
+/* ── REFLECTION ── */
+.reflect-grid{display:flex;flex-direction:column;gap:.75rem;margin:.75rem 0;}
+.reflect-row{display:flex;align-items:center;gap:.75rem;flex-wrap:wrap;}
+.reflect-row label{flex:1;min-width:180px;color:var(--text2);font-size:.93rem;}
+.star-row{display:flex;gap:.3rem;}
+.star{font-size:1.4rem;cursor:pointer;transition:transform .1s;filter:grayscale(1) opacity(.4);}
+.star.on{filter:none;}
+.star:hover{transform:scale(1.2);}
+
+@media(max-width:500px){.card{padding:1.2rem;}.check-item{padding:.6rem .7rem;}}
 </style>
 </head>
 <body>
 
+<!-- FULLSCREEN IMG -->
+<div id="imgOverlay" onclick="closeImg()">
+  <span class="close-hint">✕ Tippen zum Schließen</span>
+  <img id="overlayImg" src="" alt="">
+</div>
+
+<!-- ══ START ══ -->
 <div id="startScreen">
-  <div class="logo-circle">🔍</div>
-  <h1>Sinnesdetektiv</h1>
-  <p>Entdecke die Geheimnisse deiner Sinnesorgane</p>
-  <div class="name-input-wrap">
-    <label>🧑 Dein Name</label>
-    <input type="text" id="playerNameInput" placeholder="Name eingeben..." maxlength="30">
-  </div>
-  <button class="btn-primary" id="startBtn" disabled onclick="startApp()">Los geht's! →</button>
-</div>
-
-<div id="moduleScreen">
-  <div class="top-bar">
-    <h2>🔍 Sinnesdetektiv</h2>
-    <span class="player-badge" id="playerBadge"></span>
-    <button class="highscore-btn" onclick="showHighscore()">🏆 Highscore</button>
-  </div>
-  <div class="modules-grid" id="modulesGrid"></div>
-</div>
-
-<div id="contentScreen">
-  <div class="content-header">
-    <button class="back-btn" onclick="goBack()">← Zurück</button>
-    <div class="progress-bar-wrap">
-      <div class="progress-bar-fill" id="progressFill" style="width:0%"></div>
+  <div class="logo-circle">👁️</div>
+  <h1>Das Auge</h1>
+  <p>Entdecke Aufbau, Funktion und das Geheimnis des blinden Flecks</p>
+  <div class="name-box">
+    <label>Dein Name</label>
+    <input type="text" id="nameInput" placeholder="Vorname Nachname" maxlength="40">
+    <div class="class-row">
+      <input type="text" id="classInput" placeholder="Klasse (z.B. 5b)" maxlength="10">
+      <input type="date" id="dateInput">
     </div>
-    <span id="progressLabel" style="font-size:.85rem;color:var(--text2)"></span>
+  </div>
+  <button class="btn-primary" id="startBtn" disabled onclick="startModule()">Los geht's →</button>
+</div>
+
+<!-- ══ CONTENT ══ -->
+<div id="contentScreen">
+  <div class="top-header">
+    <span class="module-tag">👁️ Das Auge</span>
+    <div class="prog-wrap"><div class="prog-fill" id="progFill" style="width:0%"></div></div>
+    <span class="prog-label" id="progLabel">0/8</span>
   </div>
   <div id="stepContainer"></div>
 </div>
 
-<div id="highscoreScreen">
-  <div class="top-bar">
-    <h2>🏆 Highscore</h2>
-    <button class="back-btn" onclick="showModules()">← Zurück</button>
-  </div>
-  <div class="tabs" id="hsTabs"></div>
-  <div id="hsContent"></div>
-</div>
-
 <script>
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyVVhp-QCwpiIKXa9IfudSjVZT6bPnjkuGALue2C9TrskD5dsfqo8QxtkQ3Z1vpj9206A/exec";
-let playerName = "";
-let completedModules = JSON.parse(localStorage.getItem("sinnes_completed") || "{}");
-let currentModule = null;
-let currentStepIndex = 0;
-let moduleScore = 0;
+// ═══════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════
+let studentName = "", studentClass = "", studentDate = "";
+let stepIdx = 0, totalScore = 0;
+let savedData = {
+  hypothese: "", beobachtung: "", fazit: "",
+  reflection: {verstanden:0, spass:0, schwierig:0},
+  quizScores: []
+};
 
-// ═══════════ MODULE DEFINITIONS ═══════════
-const modules = [
-  { id:"auge", icon:"👁️", title:"Das Auge", desc:"Aufbau, Funktion & Sehexperiment", color:"#58a6ff", steps: augeSteps() },
-  { id:"ohr", icon:"👂", title:"Das Ohr", desc:"Aufbau, Funktion & Hörexperiment", color:"#d2a8ff", steps: ohrSteps() },
-  { id:"nase", icon:"👃", title:"Die Nase", desc:"Aufbau, Funktion & Riechexperiment", color:"#3fb950", steps: naseSteps() },
-  { id:"zunge", icon:"👅", title:"Die Zunge", desc:"Aufbau, Funktion & Schmeckexperiment", color:"#f78166", steps: zungeSteps() },
-  { id:"haut", icon:"✋", title:"Die Haut", desc:"Aufbau, Funktion & Tastexperiment", color:"#ffa657", steps: hautSteps() },
-  { id:"gehirn", icon:"🧠", title:"Gehirn & Nerven", desc:"Aufbau, Funktion & Gehirnexperiment", color:"#79c0ff", steps: gehirnSteps() }
-];
+const nameInput = document.getElementById("nameInput");
+const classInput = document.getElementById("classInput");
+const dateInput = document.getElementById("dateInput");
+const startBtn = document.getElementById("startBtn");
 
-function mkText(label, title, content) { return {type:"text",label,title,content}; }
-function mkZuordnung(label, title, intro, terms, slots) { return {type:"zuordnung",label,title,intro,terms,slots}; }
-function mkQuiz(label, questions) { return {type:"quiz",label,questions}; }
-function mkExp(title, fragestellung, material, minH, minB, anleitung, erklaerung, hypothesePruefung) {
-  return {type:"experiment",label:"🔬 Experiment",title,fragestellung,material,minWordsHypothese:minH,minWordsBeobachtung:minB,anleitung,erklaerung,hypothesePruefung};
+// Set today's date
+dateInput.valueAsDate = new Date();
+
+nameInput.addEventListener("input", checkStart);
+nameInput.addEventListener("keydown", e=>{ if(e.key==="Enter") startModule(); });
+
+function checkStart() {
+  startBtn.disabled = nameInput.value.trim().length < 2;
 }
 
-// ════════════ AUGE ════════════
-function augeSteps() { return [
-  mkText("📖 Sachtext 1","Aufbau des Auges",`
-    <p>Das Auge ist unser wichtigstes Sinnesorgan. Von außen siehst du die <strong>Hornhaut</strong> – eine durchsichtige Schutzschicht. Dahinter liegt die farbige <strong>Iris</strong>, die deine Augenfarbe bestimmt. In der Mitte befindet sich die <strong>Pupille</strong> – die schwarze Öffnung, durch die Licht ins Auge fällt.</p>
-    <p>Hinter der Pupille liegt die <strong>Linse</strong>. Sie bündelt das Licht und wirft ein Bild auf die <strong>Netzhaut</strong> (Retina) auf der Rückseite des Auges. Dort sitzen Millionen Sinneszellen: <strong>Stäbchen</strong> (Hell/Dunkel) und <strong>Zapfen</strong> (Farben). Der <strong>Sehnerv</strong> leitet die Signale ans Gehirn.</p>
-    <div class="info-box">💡 Das Auge ist nur 24 mm groß – enthält aber über 130 Millionen Sinneszellen!</div>`),
-  mkZuordnung("🏷️ Zuordnung","Beschrifte das Auge","Klicke einen Begriff an – dann auf das passende Feld.",
-    ["Hornhaut","Iris","Pupille","Linse","Netzhaut","Sehnerv"],
-    [{id:"s1",label:"1 – Äußere, durchsichtige Schutzschicht",answer:"Hornhaut"},
-     {id:"s2",label:"2 – Farbiger Ringmuskel (Augenfarbe)",answer:"Iris"},
-     {id:"s3",label:"3 – Schwarze Öffnung in der Mitte",answer:"Pupille"},
-     {id:"s4",label:"4 – Bündelt das Licht",answer:"Linse"},
-     {id:"s5",label:"5 – Enthält Seh-Sinneszellen",answer:"Netzhaut"},
-     {id:"s6",label:"6 – Leitet Signale zum Gehirn",answer:"Sehnerv"}]),
-  mkQuiz("❓ Fragen zum Aufbau",[
-    {q:"Was macht die Iris?",options:["Sie bündelt das Licht","Sie bestimmt die Augenfarbe und reguliert den Lichteinfall","Sie leitet Signale ins Gehirn","Sie schützt das Auge von außen"],correct:1,feedback:"Richtig! Die Iris gibt dem Auge seine Farbe und steuert, wie viel Licht durch die Pupille fällt."},
-    {q:"Für was sind die Zapfen in der Netzhaut zuständig?",options:["Sehen bei Dunkelheit","Farbsehen","Scharfstellen","Augenbewegung"],correct:1,feedback:"Korrekt! Die Zapfen ermöglichen das Farbsehen, die Stäbchen das Sehen bei wenig Licht."},
-    {q:"Was macht der Sehnerv?",options:["Er bündelt das Licht","Er wandelt Farben um","Er leitet Signale vom Auge zum Gehirn","Er hält das Auge feucht"],correct:2,feedback:"Genau! Der Sehnerv verbindet Auge und Gehirn."}]),
-  mkText("📖 Sachtext 2","Wie funktioniert das Sehen?",`
-    <p><strong>1. Licht tritt ein:</strong> Licht fällt durch Hornhaut und Pupille ins Auge. Die Iris reguliert dabei, wie viel Licht eingelassen wird – bei hellem Licht wird die Pupille kleiner, bei Dunkelheit größer.</p>
-    <p><strong>2. Licht wird gebündelt:</strong> Die Linse wirft ein scharfes Bild auf die Netzhaut. Das Bild entsteht dabei <em>auf dem Kopf stehend</em> – das Gehirn dreht es wieder um!</p>
-    <p><strong>3. Reiz wird weitergeleitet:</strong> Sinneszellen wandeln Licht in elektrische Signale um, die über den Sehnerv ans Gehirn gehen.</p>
-    <p><strong>4. Gehirn verarbeitet:</strong> Das Gehirn setzt alles zu einem vollständigen Bild zusammen und ergänzt sogar fehlende Informationen.</p>
-    <div class="info-box">💡 Das Bild auf deiner Netzhaut steht auf dem Kopf – erst dein Gehirn dreht es um!</div>`),
-  mkQuiz("❓ Fragen zur Funktion",[
-    {q:"Was passiert mit der Pupille bei hellem Licht?",options:["Sie wird größer","Sie wird kleiner","Sie verschwindet","Sie ändert die Farbe"],correct:1,feedback:"Richtig! Bei hellem Licht wird die Pupille kleiner, damit nicht zu viel Licht ins Auge fällt."},
-    {q:"Wie erscheint das Bild auf der Netzhaut?",options:["Aufrecht und vergrößert","Auf dem Kopf stehend","Verschwommen","In Schwarz-Weiß"],correct:1,feedback:"Das Bild auf der Netzhaut ist umgekehrt – erst das Gehirn dreht es zurück."},
-    {q:"Was ergänzt das Gehirn beim Sehen?",options:["Gar nichts","Fehlende Informationen im Bild","Die Farben","Den Abstand zu Objekten"],correct:1,feedback:"Genau! Das Gehirn füllt aktiv Lücken im Sehbild – wie beim blinden Fleck!"}]),
-  mkExp("Den blinden Fleck entdecken",
-    "Hat unser Auge eine Stelle, an der es nichts sieht?",
-    "Ein Blatt Papier, einen Stift",15,20,
-    ["Zeichne auf ein Blatt Papier links ein <strong>+</strong> und rechts einen <strong>Punkt ●</strong> – ca. 15 cm Abstand.",
-     "Halte das Papier in Armabstand. Schließe das <strong>rechte Auge</strong>.",
-     "Schaue mit dem linken Auge fest auf das <strong>+</strong>.",
-     "Bewege das Papier <strong>langsam auf dich zu</strong> – halte den Blick auf dem + !",
-     "Beobachte: Was passiert mit dem Punkt?"],
-    {content:`<p>Der Punkt verschwindet – das ist dein <strong>blinder Fleck</strong>! Wo der Sehnerv aus dem Auge tritt, gibt es keine Sinneszellen.</p><p>Im Alltag merkst du das nicht, weil beide Augen sich ergänzen und das Gehirn die Lücke automatisch auffüllt.</p><div class="info-box">💡 Dein Gehirn erfindet, was in der Lücke sein sollte – du merkst es gar nicht!</div>`},
-    [{q:"Was ist beim Experiment passiert?",options:["Der Punkt blieb sichtbar","Der Punkt wechselte die Farbe","Der Punkt verschwand an einer Stelle","Das + verschwand"],correct:2,feedback:"Genau! An einer bestimmten Distanz verschwindet der Punkt – das ist der blinde Fleck."},
-     {q:"Warum fällt uns der blinde Fleck im Alltag nicht auf?",options:["Weil er sehr klein ist","Weil das Gehirn die Lücke auffüllt und wir zwei Augen haben","Weil sich das Auge dreht","Weil wir ihn ausblenden können"],correct:1,feedback:"Das Gehirn ergänzt die fehlende Information – wir nehmen die Lücke daher nicht wahr."}])
-];}
-
-// ════════════ OHR ════════════
-function ohrSteps() { return [
-  mkText("📖 Sachtext 1","Aufbau des Ohres",`
-    <p>Das Ohr wandelt Schallwellen in Signale um. Es besteht aus drei Bereichen: <strong>Außenohr, Mittelohr</strong> und <strong>Innenohr</strong>.</p>
-    <p>Die <strong>Ohrmuschel</strong> fängt Schallwellen auf und leitet sie durch den Gehörgang zum <strong>Trommelfell</strong> – einer dünnen Membran, die durch Schall zu schwingen beginnt.</p>
-    <p>Im <strong>Mittelohr</strong> verstärken drei winzige Knochen die Schwingungen: <strong>Hammer, Amboss und Steigbügel</strong>. Im <strong>Innenohr</strong> liegt die spiralförmige <strong>Schnecke (Cochlea)</strong>. Dort wandeln Sinneszellen Schwingungen in elektrische Signale um, die der <strong>Hörnerv</strong> ans Gehirn sendet.</p>
-    <div class="info-box">💡 Der Steigbügel ist der kleinste Knochen im Körper – er ist nur 3 mm groß!</div>`),
-  mkZuordnung("🏷️ Zuordnung","Teile des Ohres zuordnen","Klicke einen Begriff an – dann auf das passende Feld.",
-    ["Ohrmuschel","Trommelfell","Hammer","Steigbügel","Schnecke","Hörnerv"],
-    [{id:"o1",label:"1 – Fängt Schallwellen auf",answer:"Ohrmuschel"},
-     {id:"o2",label:"2 – Dünne Membran, die schwingt",answer:"Trommelfell"},
-     {id:"o3",label:"3 – Erster der drei Gehörknöchelchen",answer:"Hammer"},
-     {id:"o4",label:"4 – Kleinster Knochen im Körper",answer:"Steigbügel"},
-     {id:"o5",label:"5 – Spiralförmiges Organ im Innenohr",answer:"Schnecke"},
-     {id:"o6",label:"6 – Leitet Signale zum Gehirn",answer:"Hörnerv"}]),
-  mkQuiz("❓ Fragen zum Aufbau",[
-    {q:"Welche Aufgabe hat das Trommelfell?",options:["Schallwellen auffangen","Durch Schall zu schwingen","Signale ans Gehirn senden","Geräusche verstärken"],correct:1,feedback:"Das Trommelfell wird durch Schallwellen zum Schwingen gebracht und überträgt so die Schwingungen ins Mittelohr."},
-    {q:"Wie viele Knochen sind im Mittelohr?",options:["1","2","3","4"],correct:2,feedback:"Das Mittelohr enthält drei Gehörknöchelchen: Hammer, Amboss und Steigbügel."},
-    {q:"Was befindet sich im Innenohr?",options:["Das Trommelfell","Die Ohrmuschel","Die Schnecke mit Sinneszellen","Nur Luft"],correct:2,feedback:"In der Schnecke des Innenohrs befinden sich die Sinneszellen, die Schwingungen in Nervenimpulse umwandeln."}]),
-  mkText("📖 Sachtext 2","Wie funktioniert das Hören?",`
-    <p>Schallwellen treffen auf die Ohrmuschel, reisen zum Trommelfell und bringen es zum <strong>Schwingen</strong>. Hammer, Amboss und Steigbügel nehmen die Schwingung auf und <strong>verstärken</strong> sie.</p>
-    <p>Der Steigbügel überträgt die Schwingung auf die <strong>Flüssigkeit in der Schnecke</strong>. Winzige <strong>Haarsinneszellen</strong> werden gereizt und wandeln die Schwingung in ein <strong>elektrisches Signal</strong> um.</p>
-    <p>Dieses Signal reist über den Hörnerv ins <strong>Gehirn</strong>, das daraus einen Ton oder ein Geräusch macht, das du bewusst wahrnimmst.</p>
-    <div class="info-box">💡 Das Ohr kann über 400.000 verschiedene Töne unterscheiden!</div>`),
-  mkQuiz("❓ Fragen zur Funktion",[
-    {q:"Was sind Schallwellen?",options:["Lichtstrahlen","Schwingungen in der Luft","Elektrische Signale","Wellen im Wasser"],correct:1,feedback:"Schallwellen sind Druckschwingungen in der Luft, die sich ausbreiten."},
-    {q:"Was machen die Haarsinneszellen in der Schnecke?",options:["Den Schall verstärken","Signale ans Gehirn leiten","Schwingungen in elektrische Signale umwandeln","Schallwellen auffangen"],correct:2,feedback:"Die Haarsinneszellen übersetzen mechanische Schwingungen in elektrische Nervenimpulse."},
-    {q:"In welcher Reihenfolge läuft Schall durch das Ohr?",options:["Schnecke→Trommelfell→Ohrmuschel→Gehirn","Ohrmuschel→Trommelfell→Gehörknöchelchen→Schnecke→Gehirn","Gehörknöchelchen→Trommelfell→Schnecke→Gehirn","Ohrmuschel→Schnecke→Trommelfell→Gehirn"],correct:1,feedback:"Von der Ohrmuschel über Trommelfell und Gehörknöchelchen zur Schnecke und dann ins Gehirn."}]),
-  mkExp("Knochenleitung des Schalls",
-    "Kann Schall auch durch Knochen geleitet werden – ohne durch die Luft zu reisen?",
-    "Nur deine Finger",15,20,
-    ["Stopfe dir beide Ohren fest mit den Zeigefingern zu.",
-     "Fange an zu <strong>summen</strong> – sing einen gleichmäßigen Ton.",
-     "Kannst du dich noch hören? Klingt es anders als ohne zugehaltene Ohren?",
-     "Versuche zu <strong>sprechen</strong> – klingt deine Stimme anders?",
-     "Lass die Ohren wieder frei und vergleiche."],
-    {content:`<p>Trotz zugehaltener Ohren hörst du dich deutlich – durch <strong>Knochenleitung</strong>! Deine Stimmbänder erzeugen Schwingungen, die sich direkt durch den Schädel zur Schnecke leiten.</p><div class="info-box">💡 Deshalb klingt deine Stimme auf Aufnahmen so fremd – dort fehlt der Knochen-Klang!</div>`},
-    [{q:"Was hast du beim Experiment beobachtet?",options:["Man hört sich gar nicht mehr","Man hört sich trotz zugehaltener Ohren klar","Die Stimme klingt sehr leise","Nichts verändert sich"],correct:1,feedback:"Trotz zugehaltener Ohren hört man sich selbst deutlich – durch Knochenleitung."},
-     {q:"Über welchen Weg gelangt der Schall bei der Knochenleitung ins Ohr?",options:["Durch die Luft über die Ohrmuschel","Über die Knochen direkt zur Schnecke","Durch das Trommelfell","Über den Sehnerv"],correct:1,feedback:"Knochenleitung: Schwingungen durch den Schädelknochen direkt zur Schnecke."}])
-];}
-
-// ════════════ NASE ════════════
-function naseSteps() { return [
-  mkText("📖 Sachtext 1","Aufbau der Nase",`
-    <p>Luft strömt durch die <strong>Nasenlöcher</strong> in die <strong>Nasenhöhle</strong>. Dort filtern <strong>Nasenhaare</strong> Staub und Schmutz. Die <strong>Nasenschleimhaut</strong> befeuchtet und erwärmt die Luft.</p>
-    <p>Ganz oben in der Nasenhöhle liegt das <strong>Riechepithel</strong> mit etwa 30 Millionen <strong>Riechsinneszellen</strong>. Auf ihren feinen Härchen (<strong>Zilien</strong>) landen Duftmoleküle. Der <strong>Riechnerv</strong> leitet die Signale direkt zum Gehirn.</p>
-    <div class="info-box">💡 Der Riechnerv ist der einzige Sinnesnerv, der ohne Umweg direkt ins Gehirn führt!</div>`),
-  mkZuordnung("🏷️ Zuordnung","Teile der Nase zuordnen","Klicke einen Begriff an – dann auf das passende Feld.",
-    ["Nasenlöcher","Nasenhaare","Nasenschleimhaut","Riechepithel","Riechsinneszellen","Riechnerv"],
-    [{id:"n1",label:"1 – Eingang für die Luft",answer:"Nasenlöcher"},
-     {id:"n2",label:"2 – Filtert Staub aus der Luft",answer:"Nasenhaare"},
-     {id:"n3",label:"3 – Befeuchtet und erwärmt die Luft",answer:"Nasenschleimhaut"},
-     {id:"n4",label:"4 – Fläche mit Riechzellen an der Nasenhöhlendecke",answer:"Riechepithel"},
-     {id:"n5",label:"5 – Nehmen Duftmoleküle wahr",answer:"Riechsinneszellen"},
-     {id:"n6",label:"6 – Leitet Signale direkt ins Gehirn",answer:"Riechnerv"}]),
-  mkQuiz("❓ Fragen zum Aufbau",[
-    {q:"Welche Aufgabe haben die Nasenhaare?",options:["Luft erwärmen","Staub und Schmutz filtern","Duftmoleküle aufnehmen","Luft anfeuchten"],correct:1,feedback:"Die Nasenhaare funktionieren wie ein Filter und halten Staub und Pollen zurück."},
-    {q:"Wo sitzen die Riechsinneszellen?",options:["Im Gehirn","An den Nasenlöchern","Oben in der Nasenhöhle (Riechepithel)","In der Nasenschleimhaut"],correct:2,feedback:"Das Riechepithel mit den Riechsinneszellen befindet sich ganz oben in der Nasenhöhle."},
-    {q:"Was ist besonders am Riechnerv?",options:["Er ist der größte Nerv","Er führt direkt ins Gehirn ohne Umweg","Er ist doppelt vorhanden","Er kann sich regenerieren"],correct:1,feedback:"Der Riechnerv ist einzigartig – er führt ohne Umweg direkt ins Gehirn."}]),
-  mkText("📖 Sachtext 2","Wie funktioniert das Riechen?",`
-    <p>Alle Gegenstände mit Geruch geben winzige <strong>Duftmoleküle</strong> in die Luft ab. Diese lösen sich in der feuchten Schleimschicht des Riechepithels auf. Die Zilien der Riechsinneszellen nehmen sie auf und senden ein <strong>elektrisches Signal</strong> ans Gehirn.</p>
-    <p>Riechen und <strong>Schmecken hängen eng zusammen</strong>: Ein großer Teil dessen, was wir als "Geschmack" wahrnehmen, kommt über die Nase. Wenn du erkältet bist, schmeckt Essen deshalb weniger.</p>
-    <p>Gerüche lösen starke <strong>Erinnerungen und Gefühle</strong> aus, weil der Riechnerv direkt mit dem Gedächtnis- und Gefühlszentrum des Gehirns verbunden ist.</p>
-    <div class="info-box">💡 Menschen können über 1 Billion verschiedene Gerüche unterscheiden!</div>`),
-  mkQuiz("❓ Fragen zur Funktion",[
-    {q:"Was sind Duftmoleküle?",options:["Kleine Flüssigkeitstropfen","Winzige Teilchen, die Gegenstände in die Luft abgeben","Elektrische Signale","Schallwellen für die Nase"],correct:1,feedback:"Alle riechenden Dinge geben ständig Duftmoleküle in die Luft ab."},
-    {q:"Warum schmeckt Essen schlechter bei Erkältung?",options:["Wegen Fieber","Weil die Zunge geschwollen ist","Weil die Nase nicht riechen kann und Riechen zum Schmecken gehört","Weil man weniger Hunger hat"],correct:2,feedback:"Riechen und Schmecken arbeiten zusammen – ein Großteil des Geschmacks kommt über die Nase."},
-    {q:"Warum lösen Gerüche oft Erinnerungen aus?",options:["Weil Gerüche sehr laut sind","Weil der Riechnerv direkt mit dem Gedächtnis- und Gefühlszentrum verbunden ist","Weil wir Gerüche nie vergessen","Weil die Nase nah an den Augen ist"],correct:1,feedback:"Der direkte Weg des Riechnervs zum Gedächtniszentrum erklärt starke Geruchs-Erinnerungen."}]),
-  mkExp("Riechen und Schmecken – ein Team!",
-    "Beeinflusst das Riechen, was wir schmecken?",
-    "Zwei verschiedene Lebensmittel (z.B. Apfel und Birne)",15,20,
-    ["Bitte einen Mitschüler, zwei verschiedene Lebensmittel vorzubereiten.",
-     "Halte dir die <strong>Nase zu</strong> und schließe die Augen.",
-     "Lass dir ein Stück in den Mund legen und kaue darauf.",
-     "Versuche zu erraten, was du isst – nur durch den Geschmack!",
-     "Lass die Nase los und atme ein – was verändert sich sofort?"],
-    {content:`<p>Mit zugehaltener Nase ist es schwer, Lebensmittel zu unterscheiden. Sobald du die Nase wieder freigibst, entfaltet sich der volle Geschmack!</p><p>Beim Kauen steigen Duftmoleküle durch den Rachen zur Nase auf (<strong>retronasales Riechen</strong>). Der größte Teil des "Geschmacks" ist eigentlich Geruch.</p><div class="info-box">💡 Ohne Nase nehmen wir nur 5 Grundgeschmäcker wahr: süß, sauer, salzig, bitter, umami.</div>`},
-    [{q:"Was ist passiert, als du die Nase zugehalten hast?",options:["Alles schmeckte normal","Es war schwerer, Lebensmittel zu unterscheiden","Es hat viel besser geschmeckt","Du konntest gar nichts schmecken"],correct:1,feedback:"Ohne Riechen wird das Schmecken deutlich eingeschränkt."},
-     {q:"Was bedeutet 'retronasal'?",options:["Riechen von außen durch die Nase","Duftmoleküle steigen beim Kauen durch den Rachen zur Nase auf","Riechen mit dem Mund","Ein Nerv im Rachen"],correct:1,feedback:"Retronasales Riechen: Duftmoleküle vom Mund nach oben zur Nase – der Hauptweg beim Schmecken."}])
-];}
-
-// ════════════ ZUNGE ════════════
-function zungeSteps() { return [
-  mkText("📖 Sachtext 1","Aufbau der Zunge",`
-    <p>Die Zunge ist ein Muskel und unser <strong>Geschmacksorgan</strong>. Ihre Oberfläche ist bedeckt mit kleinen Erhebungen, den <strong>Papillen</strong>. Die rauen <strong>Fadenpapillen</strong> enthalten keine Geschmackszellen. Die <strong>Pilz-, Wall- und Blätterpapillen</strong> hingegen enthalten <strong>Geschmacksknospen</strong>.</p>
-    <p>In jeder Geschmacksknospe sitzen <strong>Geschmackssinneszellen</strong> mit kleinen <strong>Geschmacksporen</strong>. Durch diese Poren gelangen im <strong>Speichel</strong> gelöste Stoffe an die Sinneszellen.</p>
-    <div class="info-box">💡 Die Zunge hat etwa 10.000 Geschmacksknospen!</div>`),
-  mkZuordnung("🏷️ Zuordnung","Teile der Zunge zuordnen","Klicke einen Begriff an – dann auf das passende Feld.",
-    ["Papillen","Fadenpapillen","Geschmacksknospen","Geschmackssinneszellen","Geschmacksporen","Speichel"],
-    [{id:"z1",label:"1 – Kleine Erhebungen auf der Zungenoberfläche",answer:"Papillen"},
-     {id:"z2",label:"2 – Raue Textur der Zunge (kein Geschmack)",answer:"Fadenpapillen"},
-     {id:"z3",label:"3 – Enthalten die eigentlichen Geschmackszellen",answer:"Geschmacksknospen"},
-     {id:"z4",label:"4 – Nehmen Geschmacksstoffe wahr",answer:"Geschmackssinneszellen"},
-     {id:"z5",label:"5 – Öffnungen, durch die Stoffe zu den Sinneszellen gelangen",answer:"Geschmacksporen"},
-     {id:"z6",label:"6 – Löst Stoffe auf, damit sie wahrgenommen werden",answer:"Speichel"}]),
-  mkQuiz("❓ Fragen zum Aufbau",[
-    {q:"Was sind Papillen?",options:["Nerven in der Zunge","Kleine Erhebungen auf der Zungenoberfläche","Speicheldrüsen","Muskeln der Zunge"],correct:1,feedback:"Papillen sind die kleinen Erhebungen, die der Zunge ihre raue Oberfläche geben."},
-    {q:"Warum braucht man Speichel zum Schmecken?",options:["Er macht die Zunge weich","Er löst Stoffe auf, damit sie die Sinneszellen erreichen","Er schützt die Geschmacksknospen","Er transportiert Signale ins Gehirn"],correct:1,feedback:"Nur gelöste Stoffe können durch die Geschmacksporen zu den Sinneszellen."},
-    {q:"Wie viele Geschmacksknospen hat die Zunge?",options:["100","1.000","10.000","1.000.000"],correct:2,feedback:"Die menschliche Zunge hat etwa 10.000 Geschmacksknospen."}]),
-  mkText("📖 Sachtext 2","Die fünf Grundgeschmäcker",`
-    <p>Es gibt <strong>fünf Grundgeschmäcker</strong>: <strong>süß, sauer, salzig, bitter</strong> und <strong>umami</strong> (herzhaft-fleischig, z.B. in Fleisch und Käse).</p>
-    <p>Die alte "Geschmackskarte" – Zungenspitze für Süß, hinten für Bitter – stimmt <em>nicht</em>! <strong>Alle Bereiche der Zunge können alle Geschmäcker wahrnehmen.</strong></p>
-    <p>Das Gehirn kombiniert Signale der Zunge mit Riecheindrücken der Nase zum <strong>Gesamtgeschmack</strong>. <strong>Bitteres</strong> schmeckt oft unangenehm – das ist ein Schutzmechanismus gegen giftige Stoffe!</p>
-    <div class="info-box">💡 Der Geschmack "Umami" wurde erst 1908 von einem japanischen Wissenschaftler entdeckt!</div>`),
-  mkQuiz("❓ Fragen zu den Geschmäckern",[
-    {q:"Wie viele Grundgeschmäcker gibt es?",options:["3","4","5","7"],correct:2,feedback:"Es gibt fünf Grundgeschmäcker: süß, sauer, salzig, bitter und umami."},
-    {q:"Stimmt es, dass die Zungenspitze nur Süßes wahrnimmt?",options:["Ja, bewiesen","Nein, alle Bereiche nehmen alle Geschmäcker wahr","Ja, aber nur bei Kindern","Nein, die Spitze schmeckt nur Saures"],correct:1,feedback:"Die alte Geschmackskarte ist ein Mythos – alle Bereiche wahrnehmen alle fünf Grundgeschmäcker."},
-    {q:"Warum mögen viele bittere Dinge nicht?",options:["Weil bitter ungesund ist","Bitterkeit ist ein evolutionärer Schutzreflex gegen giftige Stoffe","Weil Bitteres die Zunge reizt","Weil die Zunge dafür nicht ausgebildet ist"],correct:1,feedback:"Die Abneigung gegen Bitteres warnt uns evolutionär vor möglichen Giftstoffen."}]),
-  mkExp("Schmecken ohne Speichel?",
-    "Kann man schmecken, wenn die Zunge völlig trocken ist?",
-    "Papiertaschentuch, etwas Salz oder Zucker",15,20,
-    ["Trockne deine Zunge gut mit einem <strong>Papiertuch</strong> ab.",
-     "Streue sofort ein bisschen <strong>Salz oder Zucker</strong> direkt auf die trockene Zunge.",
-     "Was schmeckst du? Kannst du etwas wahrnehmen?",
-     "Warte ein paar Sekunden – was verändert sich, wenn Speichel entsteht?",
-     "Beschreibe genau, was passiert."],
-    {content:`<p>Auf der trockenen Zunge schmeckt man kaum etwas – erst der Speichel löst das Salz oder den Zucker auf und ermöglicht den Geschmack.</p><p>Nur <em>gelöste</em> Stoffe können durch die Geschmacksporen zu den Sinneszellen gelangen.</p><div class="info-box">💡 Wir produzieren täglich 1–1,5 Liter Speichel – unverzichtbar fürs Schmecken!</div>`},
-    [{q:"Was ist passiert beim Salz/Zucker auf der trockenen Zunge?",options:["Man hat es sofort stark geschmeckt","Man hat zunächst kaum etwas geschmeckt, erst mit Speichel","Kein Unterschied","Es hat gejuckt"],correct:1,feedback:"Ohne Speichel können die Stoffe nicht zu den Geschmackssinneszellen gelangen."},
-     {q:"Welche Rolle spielt der Speichel beim Schmecken?",options:["Keine Rolle","Er kühlt die Zunge","Er löst Stoffe auf, damit sie zu den Sinneszellen gelangen","Er produziert Geschmackssignale"],correct:2,feedback:"Speichel löst Stoffe auf – erst dann können sie durch die Geschmacksporen zu den Sinneszellen."}])
-];}
-
-// ════════════ HAUT ════════════
-function hautSteps() { return [
-  mkText("📖 Sachtext 1","Aufbau der Haut",`
-    <p>Die Haut ist das <strong>größte Organ</strong> – ca. 1,7 m², rund 4 kg. Sie schützt vor Erregern, reguliert Temperatur und ist unser <strong>Tastorgan</strong>.</p>
-    <p>Drei Schichten: <strong>Oberhaut (Epidermis)</strong> – äußerste Schutzschicht; <strong>Lederhaut (Dermis)</strong> – enthält Sinneskörperchen, Blutgefäße, Drüsen; <strong>Unterhaut (Subcutis)</strong> – Fettschicht, isoliert und polstert.</p>
-    <p>In der Lederhaut sitzen verschiedene <strong>Tastrezeptoren</strong>: <strong>Meissner-Körperchen</strong> (leichte Berührung), <strong>Pacini-Körperchen</strong> (Druck, Vibration), <strong>Merkel-Scheiben</strong> (feine Details), <strong>Ruffini-Körperchen</strong> (Dehnung, Wärme).</p>
-    <div class="info-box">💡 Fingerkuppen haben bis zu 2500 Rezeptoren pro cm² – die dichteste Verteilung am ganzen Körper!</div>`),
-  mkZuordnung("🏷️ Zuordnung","Hautschichten und Rezeptoren zuordnen","Klicke einen Begriff an – dann auf das passende Feld.",
-    ["Epidermis","Dermis","Subcutis","Meissner-Körperchen","Pacini-Körperchen","Merkel-Scheiben"],
-    [{id:"h1",label:"1 – Äußerste Schutzschicht",answer:"Epidermis"},
-     {id:"h2",label:"2 – Enthält Sinneskörperchen und Drüsen",answer:"Dermis"},
-     {id:"h3",label:"3 – Unterste Fettschicht, isoliert und polstert",answer:"Subcutis"},
-     {id:"h4",label:"4 – Für leichte Berührung zuständig",answer:"Meissner-Körperchen"},
-     {id:"h5",label:"5 – Für Druck und Vibration zuständig",answer:"Pacini-Körperchen"},
-     {id:"h6",label:"6 – Für feine Details und anhaltenden Druck",answer:"Merkel-Scheiben"}]),
-  mkQuiz("❓ Fragen zum Aufbau",[
-    {q:"Wie groß ist die Hautoberfläche eines Erwachsenen?",options:["0,5 m²","1,7 m²","3 m²","5 m²"],correct:1,feedback:"Die Haut bedeckt beim Erwachsenen ca. 1,7 m² – größtes Organ des Körpers."},
-    {q:"In welcher Hautschicht liegen die meisten Tastrezeptoren?",options:["Oberhaut (Epidermis)","Lederhaut (Dermis)","Unterhaut (Subcutis)","Gleichmäßig überall"],correct:1,feedback:"Die Lederhaut enthält die meisten Mechanorezeptoren und Drüsen."},
-    {q:"Warum haben Fingerkuppen so viele Tastrezeptoren?",options:["Weil sie kälter sind","Weil wir mit ihnen feine Strukturen ertasten","Weil sie dicker sind","Weil dort keine Haare wachsen"],correct:1,feedback:"Mit Fingerkuppen ertasten wir Details – die Rezeptordichte ist deshalb besonders hoch."}]),
-  mkText("📖 Sachtext 2","Wie funktioniert der Tastsinn?",`
-    <p>Der Tastsinn ist ein <strong>Zusammenspiel verschiedener Empfindungen</strong>: Druck, Berührung, Temperatur, Schmerz und Vibration. Unterschiedliche Rezeptoren nehmen sie wahr und senden elektrische Signale über <strong>Nervenfasern</strong> ans Gehirn.</p>
-    <p>Die <strong>Zwei-Punkt-Schwelle</strong> zeigt, wie fein eine Körperstelle unterscheidet: An der Fingerkuppe merkt man zwei Berührungspunkte ab 2 mm Abstand – am Rücken erst ab 40 mm!</p>
-    <p><strong>Schmerz</strong> ist ein lebenswichtiges Warnsignal vor Verletzungen. <strong>Temperatur</strong> wird durch Wärme- und Kälterezeptoren gemessen – relativ zur aktuellen Hauttemperatur.</p>
-    <div class="info-box">💡 Schmerz ist ein Warnsignal – ohne ihn würde man Verletzungen nicht rechtzeitig bemerken.</div>`),
-  mkQuiz("❓ Fragen zur Funktion",[
-    {q:"Was ist die 'Zwei-Punkt-Schwelle'?",options:["Grenze zwischen Hautschichten","Kleinster Abstand, bei dem man zwei Berührungen getrennt wahrnimmt","Maximale Stärke eines Druckreizes","Grenze zwischen Wärme- und Kälteempfinden"],correct:1,feedback:"Die Zwei-Punkt-Schwelle gibt an, wie fein eine Körperstelle unterscheiden kann."},
-    {q:"Warum ist der Rücken weniger tastempfindlich als Fingerkuppen?",options:["Der Rücken ist aus anderem Material","Am Rücken sitzen viel weniger Tastrezeptoren","Der Rücken ist dicker","Signale brauchen länger"],correct:1,feedback:"Die Dichte der Tastrezeptoren am Rücken ist viel geringer – deshalb ist er weniger empfindlich."},
-    {q:"Wozu dient der Schmerzsinn?",options:["Um Temperatur zu messen","Als Warnsystem vor Verletzungen","Um Druck zu unterscheiden","Um Oberflächen zu erkennen"],correct:1,feedback:"Schmerz ist ein lebenswichtiges Warnsignal – ohne ihn würde man Verletzungen nicht bemerken."}]),
-  mkExp("Die Temperatur-Täuschung",
-    "Kann die Haut uns bei der Temperaturwahrnehmung täuschen?",
-    "3 Behälter: einer mit kaltem, einer mit lauwarmem, einer mit warmem Wasser",15,25,
-    ["Stelle drei Behälter auf: <strong>links kalt, Mitte lauwarm, rechts warm</strong> (nicht zu heiß!).",
-     "Tauche gleichzeitig eine Hand in <strong>kalt</strong> und die andere in <strong>warm</strong>.",
-     "Halte beide Hände <strong>30 Sekunden</strong> drin.",
-     "Tauche jetzt <strong>beide Hände gleichzeitig</strong> in das <strong>lauwarme</strong> Wasser.",
-     "Was fühlt jede Hand? Fühlen sich beide gleich an?"],
-    {content:`<p>Die Hand aus dem Kalten empfindet das lauwarme Wasser als <strong>warm</strong>, die Hand aus dem Warmen empfindet es als <strong>kalt</strong> – obwohl beide in derselben Flüssigkeit sind!</p><p>Temperaturrezeptoren messen <strong>relative Unterschiede</strong> zur aktuellen Hauttemperatur. Das nennt man <strong>Temperaturadaptation</strong>.</p><div class="info-box">💡 Unsere Sinne messen oft Veränderungen statt absoluter Werte – das macht sie effizient, kann uns aber täuschen!</div>`},
-    [{q:"Was haben die beiden Hände im lauwarmen Wasser gespürt?",options:["Beide dasselbe","Die Hand aus dem Kalten warm, die aus dem Warmen kalt","Beide fühlten nichts","Beide empfanden kalt"],correct:1,feedback:"Dieselbe Temperatur wurde völlig unterschiedlich wahrgenommen – relative Messung!"},
-     {q:"Was messen unsere Temperaturrezeptoren?",options:["Die absolute Temperatur","Den Unterschied zur aktuellen Hauttemperatur","Die Lufttemperatur","Nur große Temperaturunterschiede"],correct:1,feedback:"Temperaturrezeptoren messen relative Veränderungen – das erklärt die Täuschung."}])
-];}
-
-// ════════════ GEHIRN ════════════
-function gehirnSteps() { return [
-  mkText("📖 Sachtext 1","Aufbau des Gehirns und der Nerven",`
-    <p>Das Gehirn – ca. <strong>1,3 kg</strong>, rund <strong>86 Milliarden Nervenzellen</strong> – ist die Schaltzentrale. Das <strong>Großhirn</strong> verarbeitet Denken, Sprechen, Sehen, Hören, Bewegungen. Das <strong>Kleinhirn</strong> koordiniert Bewegungen und Balance. Der <strong>Hirnstamm</strong> steuert Atmung und Herzschlag.</p>
-    <p>Das <strong>Rückenmark</strong> verbindet Gehirn und Körper. Eine <strong>Nervenzelle (Neuron)</strong> hat Dendriten (empfangen Signale) und ein <strong>Axon</strong> (leitet Signal weiter).</p>
-    <div class="info-box">💡 Nervensignale rasen mit bis zu 120 m/s – das sind 432 km/h!</div>`),
-  mkZuordnung("🏷️ Zuordnung","Gehirnteile und Nervenzellen zuordnen","Klicke einen Begriff an – dann auf das passende Feld.",
-    ["Großhirn","Kleinhirn","Hirnstamm","Rückenmark","Dendriten","Axon"],
-    [{id:"g1",label:"1 – Denken, Sprechen, bewusste Wahrnehmung",answer:"Großhirn"},
-     {id:"g2",label:"2 – Koordiniert Bewegung und Balance",answer:"Kleinhirn"},
-     {id:"g3",label:"3 – Steuert Atmung und Herzschlag",answer:"Hirnstamm"},
-     {id:"g4",label:"4 – Verbindet Gehirn und Körper",answer:"Rückenmark"},
-     {id:"g5",label:"5 – Empfangen Signale von anderen Nervenzellen",answer:"Dendriten"},
-     {id:"g6",label:"6 – Leitet das Signal zur nächsten Zelle weiter",answer:"Axon"}]),
-  mkQuiz("❓ Fragen zum Aufbau",[
-    {q:"Welcher Teil ist für Denken und Sprechen zuständig?",options:["Kleinhirn","Hirnstamm","Großhirn","Rückenmark"],correct:2,feedback:"Das Großhirn ist verantwortlich für Denken, Sprache und bewusste Wahrnehmung."},
-    {q:"Was macht das Kleinhirn?",options:["Verarbeitet Gerüche","Koordiniert Bewegungen und Balance","Steuert die Atmung","Empfängt Sehsignale"],correct:1,feedback:"Das Kleinhirn ist für feine Bewegungsabstimmung und Gleichgewicht zuständig."},
-    {q:"Was sind Dendriten?",options:["Axone","Synapsen","Empfangsfortsätze einer Nervenzelle","Nervenenden in der Haut"],correct:2,feedback:"Dendriten empfangen Signale von anderen Nervenzellen."}]),
-  mkText("📖 Sachtext 2","Wie verarbeitet das Gehirn Sinneseindrücke?",`
-    <p>Jede Sekunde strömen Millionen Sinneseindrücke auf das Gehirn ein – es <strong>filtert und priorisiert</strong> ständig. Sinnesimpulse werden in spezialisierten Bereichen verarbeitet: <strong>Sehzentrum</strong> (hinten), <strong>Hörzentrum</strong> (seitlich), <strong>Tastzentrum</strong> (oben).</p>
-    <p>Das Gehirn <strong>interpretiert</strong> Sinneseindrücke: Es ergänzt Informationen und erkennt Muster – kann dabei aber auch täuschen. <strong>Optische Täuschungen</strong> zeigen das deutlich.</p>
-    <p>Ein Schlüsselprinzip: Das Gehirn reagiert besonders auf <strong>Veränderungen</strong>. Gleichbleibende Reize werden ausgeblendet, neue sofort wahrgenommen.</p>
-    <div class="info-box">💡 Ein "Homunkulus" zeigt, wie viel Hirnfläche jede Körperstelle beansprucht – Hände und Gesicht sind riesig!</div>`),
-  mkQuiz("❓ Fragen zur Funktion",[
-    {q:"Wo liegt das Sehzentrum?",options:["Vorne im Stirnlappen","Hinten im Großhirn","Im Kleinhirn","Im Hirnstamm"],correct:1,feedback:"Das Sehzentrum (visueller Kortex) liegt im hinteren Teil des Großhirns."},
-    {q:"Warum kann das Gehirn uns durch optische Täuschungen täuschen?",options:["Weil Augen schlechte Daten liefern","Weil das Gehirn Informationen interpretiert und dabei irren kann","Weil wir zu wenig schlafen","Weil Täuschungen das Auge irritieren"],correct:1,feedback:"Das Auge liefert korrekte Daten – das Gehirn interpretiert sie auf Basis von Erfahrungen falsch."},
-    {q:"Auf was reagiert das Gehirn besonders stark?",options:["Auf gleichbleibende Reize","Auf schwache Reize","Auf Veränderungen und neue Reize","Auf bekannte Reize"],correct:2,feedback:"Das Gehirn blendet gleichbleibende Reize aus und reagiert stark auf Veränderungen – evolutionär sinnvoll."}]),
-  mkExp("Der Stroop-Effekt",
-    "Kann das Gehirn zwei widersprüchliche Informationen gleichzeitig verarbeiten?",
-    "Stift und Papier (am besten Buntstifte)",15,25,
-    ["Schreibe Farbwörter in der <strong>falschen Farbe</strong>: z.B. 'ROT' in blauer Farbe, 'BLAU' in roter Farbe, 'GRÜN' in gelber Farbe.",
-     "Aufgabe 1: Lies die <strong>Wörter</strong> laut vor. Wie schnell geht das?",
-     "Aufgabe 2: Nenne nur die <strong>Farbe</strong>, in der das Wort geschrieben ist – ignoriere das Wort!",
-     "Ist Aufgabe 2 schwerer? Machst du Fehler? Stockst du?",
-     "Tausche mit einem Mitschüler und stoppt die Zeit gegenseitig."],
-    {content:`<p>Aufgabe 2 ist deutlich schwerer – das Gehirn liest automatisch das Wort, obwohl es die Farbe nennen soll. Dieses Phänomen heißt <strong>Stroop-Effekt</strong>.</p><p>Lesen ist so <strong>automatisiert</strong>, dass das Gehirn es ohne bewusste Kontrolle tut. Farbbenennung erfordert bewusste Aufmerksamkeit. Beide Prozesse <strong>konkurrieren</strong> miteinander.</p><div class="info-box">💡 Der Stroop-Effekt wird in der Psychologie und Medizin genutzt, um Aufmerksamkeit und kognitive Kontrolle zu testen!</div>`},
-    [{q:"Welche Aufgabe war schwieriger?",options:["Die Wörter lesen","Die Schriftfarbe benennen","Beide gleich schwer","Beide sehr leicht"],correct:1,feedback:"Die Farbbenennung ist schwerer, weil das automatische Lesen ablenkt."},
-     {q:"Warum ist der Stroop-Effekt so stark?",options:["Weil Farben verwirren","Weil Lesen so automatisiert ist, dass es die bewusste Farbwahrnehmung stört","Weil das Auge beide Infos nicht aufnehmen kann","Weil wir selten Farben benennen"],correct:1,feedback:"Lesen ist ein so eingeübter Automatismus, dass er den bewussten Prozess überlagert."}])
-];}
-
-// ═══════════════════════════════════════════
-//  APP LOGIC
-// ═══════════════════════════════════════════
-document.getElementById("playerNameInput").addEventListener("input", function() {
-  document.getElementById("startBtn").disabled = this.value.trim().length < 2;
-});
-document.getElementById("playerNameInput").addEventListener("keydown", function(e) {
-  if (e.key === "Enter" && this.value.trim().length >= 2) startApp();
-});
-
-function startApp() {
-  playerName = document.getElementById("playerNameInput").value.trim();
+function startModule() {
+  studentName = nameInput.value.trim();
+  studentClass = classInput.value.trim() || "–";
+  studentDate = dateInput.value || new Date().toLocaleDateString("de-DE");
+  if(studentName.length < 2) return;
   document.getElementById("startScreen").style.display = "none";
-  showModules();
-}
-
-function showModules() {
-  document.getElementById("moduleScreen").style.display = "block";
-  document.getElementById("contentScreen").style.display = "none";
-  document.getElementById("highscoreScreen").style.display = "none";
-  document.getElementById("playerBadge").textContent = "👤 " + playerName;
-  const grid = document.getElementById("modulesGrid");
-  grid.innerHTML = modules.map(m => {
-    const done = completedModules[m.id];
-    return `<div class="module-card ${done?'completed':''}" style="--card-color:${m.color}" onclick="startModule('${m.id}')">
-      <div class="module-icon">${m.icon}</div>
-      <div class="module-title">${m.title}</div>
-      <div class="module-desc">${m.desc}</div>
-      <div class="module-status ${done?'status-done':'status-open'}">${done?'✅ Abgeschlossen – '+done+' Punkte':'○ Noch offen'}</div>
-    </div>`;
-  }).join('');
-}
-
-function startModule(id) {
-  currentModule = modules.find(m => m.id === id);
-  currentStepIndex = 0; moduleScore = 0;
-  document.getElementById("moduleScreen").style.display = "none";
   document.getElementById("contentScreen").style.display = "block";
   renderStep();
 }
 
-function goBack() { showModules(); }
+// ═══════════════════════════════════════
+//  STEPS DEFINITION
+// ═══════════════════════════════════════
+const STEPS = [
+  { id: "text1",       label: "📖 Sachtext 1", title: "Aufbau des Auges" },
+  { id: "zuordnung",   label: "🏷️ Zuordnung",  title: "Beschrifte das Auge" },
+  { id: "quiz1",       label: "❓ Fragen",      title: "Fragen zum Aufbau" },
+  { id: "video",       label: "🎬 Video",       title: "So funktioniert das Sehen" },
+  { id: "quiz2",       label: "❓ Fragen",      title: "Fragen zum Video" },
+  { id: "exp_intro",   label: "🔬 Experiment",  title: "Vorbereitung: Der blinde Fleck" },
+  { id: "exp_main",    label: "🔬 Experiment",  title: "Durchführung & Beobachtung" },
+  { id: "exp_explain", label: "💡 Erklärung",   title: "Was steckt dahinter?" },
+  { id: "reflection",  label: "✅ Abschluss",   title: "Reflexion & PDF" },
+];
+
+const TOTAL = STEPS.length;
 
 function updateProgress() {
-  const total = currentModule.steps.length;
-  const pct = Math.round((currentStepIndex / total) * 100);
-  document.getElementById("progressFill").style.width = pct + "%";
-  document.getElementById("progressLabel").textContent = currentStepIndex + "/" + total;
+  const pct = Math.round((stepIdx / TOTAL) * 100);
+  document.getElementById("progFill").style.width = pct + "%";
+  document.getElementById("progLabel").textContent = stepIdx + "/" + TOTAL;
+}
+
+function nextStep() {
+  stepIdx++;
+  renderStep();
+  window.scrollTo({top:0, behavior:'smooth'});
 }
 
 function renderStep() {
   updateProgress();
-  if (currentStepIndex >= currentModule.steps.length) { renderCompletion(); return; }
-  const step = currentModule.steps[currentStepIndex];
+  if(stepIdx >= TOTAL) { renderCompletion(); return; }
+  const step = STEPS[stepIdx];
   const c = document.getElementById("stepContainer");
   c.innerHTML = "";
-  if (step.type === "text") renderTextStep(step, c);
-  else if (step.type === "zuordnung") renderZuordnungStep(step, c);
-  else if (step.type === "quiz") renderQuizStep(step, c);
-  else if (step.type === "experiment") renderExperimentStep(step, c);
-}
-
-function nextStep() {
-  currentStepIndex++;
-  renderStep();
-  window.scrollTo({top:0,behavior:'smooth'});
-}
-
-function renderTextStep(step, c) {
-  c.innerHTML = `<div class="step-card"><div class="step-label">${step.label}</div><h3>${step.title}</h3>${step.content}<div class="nav-buttons"><button class="btn-next" onclick="nextStep()">Weiter →</button></div></div>`;
-}
-
-function renderZuordnungStep(step, c) {
-  let sel = null, filled = {}, used = {};
-  function render() {
-    c.innerHTML = `<div class="step-card"><div class="step-label">${step.label}</div><h3>${step.title}</h3>
-      <p style="color:var(--text2);margin-bottom:1rem">${step.intro}</p>
-      <div class="term-chips">${step.terms.map(t=>`<div class="term-chip ${sel===t?'selected':''} ${used[t]?'used':''}" onclick="__sel('${t}')">${t}</div>`).join('')}</div>
-      <div style="margin-top:1rem">${step.slots.map(s=>{const v=filled[s.id],ok=v&&v===s.answer,bad=v&&v!==s.answer;return`<div class="drop-zone ${ok?'correct':bad?'wrong':''}" onclick="__drop('${s.id}')"><span class="zone-label">${s.label}</span>${v?`<strong>${v}</strong> ${ok?'✓':bad?'✗':''}`:'<span style="color:var(--border)">—</span>'}</div>`}).join('')}</div>
-      <div id="zfb" style="margin-top:1rem"></div>
-      <div class="nav-buttons"><button class="btn-next" onclick="__chk()">Überprüfen ✓</button></div></div>`;
+  switch(step.id) {
+    case "text1":       renderText1(c); break;
+    case "zuordnung":   renderZuordnung(c); break;
+    case "quiz1":       renderQuiz1(c); break;
+    case "video":       renderVideo(c); break;
+    case "quiz2":       renderQuiz2(c); break;
+    case "exp_intro":   renderExpIntro(c); break;
+    case "exp_main":    renderExpMain(c); break;
+    case "exp_explain": renderExpExplain(c); break;
+    case "reflection":  renderReflection(c); break;
   }
-  window.__sel = t => { if(used[t])return; sel=sel===t?null:t; render(); };
-  window.__drop = id => {
-    if(!sel)return;
-    Object.keys(filled).forEach(k=>{if(filled[k]===sel)delete filled[k];});
-    filled[id]=sel; step.terms.forEach(t=>{used[t]=Object.values(filled).includes(t);}); sel=null; render();
+}
+
+// ═══════════════════════════════════════
+//  STEP 1 – SACHTEXT 1 (AUFBAU)
+// ═══════════════════════════════════════
+function renderText1(c) {
+  c.innerHTML = `
+  <div class="card">
+    <div class="step-badge">📖 Sachtext 1 – Aufbau des Auges</div>
+    <h3>Wie ist unser Auge aufgebaut?</h3>
+
+    <p>Das Auge ist unser wichtigstes Sinnesorgan – es ermöglicht uns zu sehen. Schau dir das Schaubild unten genau an, während du den Text liest.</p>
+
+    <div class="img-container">
+      <img src="AufbauAuge.jpg" alt="Schematischer Aufbau des Auges" onclick="openImg(this.src)" title="Klicken für Vollbild">
+      <div class="img-hint">🔍 Auf das Bild klicken für Vollbild</div>
+    </div>
+
+    <p>Von außen erkennst du zunächst die <strong>Hornhaut</strong> – eine durchsichtige, gewölbte Schutzschicht ganz vorne am Auge. Dahinter liegt die farbige <strong>Iris</strong> (Regenbogenhaut), die deine Augenfarbe bestimmt. In ihrer Mitte befindet sich die <strong>Pupille</strong> – das ist die schwarze Öffnung, durch die Licht ins Auge gelangt. Die Iris kann die Pupille vergrößern oder verkleinern – je nachdem, wie viel Licht vorhanden ist.</p>
+
+    <p>Hinter der Pupille liegt die <strong>Linse</strong>. Sie bündelt das Licht und schickt es auf die <strong>Netzhaut</strong> (Retina) auf der Rückseite des Auges. Auf der Netzhaut sitzen Millionen von Sinneszellen: die <strong>Stäbchen</strong> (für Hell-Dunkel-Sehen) und die <strong>Zapfen</strong> (für das Farbsehen).</p>
+
+    <p>Die Signale der Netzhaut werden über den <strong>Sehnerv</strong> ans <strong>Gehirn</strong> geleitet. Erst dort, in der Schaltzentrale unseres Körpers, entsteht das vollständige Bild, das wir bewusst wahrnehmen. Ohne Gehirn wären all die Signale des Auges nutzlos!</p>
+
+    <div class="info-box">💡 <strong>Wusstest du?</strong> Das Auge ist nur ca. 24 mm groß – enthält aber über 130 Millionen Sinneszellen auf der Netzhaut!</div>
+
+    <p>Auch außen ist das Auge geschützt: Das <strong>Augenlid</strong> schließt sich reflexartig, wenn etwas auf das Auge zufliegt. Die <strong>Tränenflüssigkeit</strong> hält die Augenoberfläche feucht, sauber und keimfrei.</p>
+
+    <div class="warn-box">🤔 <strong>Denke schon mal nach:</strong> An einer bestimmten Stelle verlässt der Sehnerv das Auge – dort können keine Sinneszellen sitzen. Was könnte das für unser Sehen bedeuten? Du wirst es im Experiment selbst herausfinden!</div>
+
+    <div class="success-box">👁️ <strong>Alltagsbeispiel:</strong> Wenn du nachts ins Dunkle gehst, werden deine Pupillen größer – die Iris öffnet sich weit, um möglichst viel Licht hereinzulassen. Gehst du dann wieder in ein helles Zimmer, kneifen die Augen zunächst: Die Iris zieht sich zusammen. Das gleiche Prinzip steckt hinter dem Experiment, das dich am Ende dieses Moduls erwartet!</div>
+
+    <div class="nav-row">
+      <button class="btn-next" onclick="nextStep()">Weiter zur Zuordnung →</button>
+    </div>
+  </div>`;
+}
+
+// ═══════════════════════════════════════
+//  STEP 2 – ZUORDNUNG
+// ═══════════════════════════════════════
+function renderZuordnung(c) {
+  const terms = ["Hornhaut","Iris","Pupille","Linse","Netzhaut","Sehnerv","Stäbchen & Zapfen","Gehirn"];
+  const slots = [
+    {id:"s1", label:"Äußere durchsichtige Schutzschicht", answer:"Hornhaut"},
+    {id:"s2", label:"Farbiger Ringmuskel – bestimmt die Augenfarbe", answer:"Iris"},
+    {id:"s3", label:"Schwarze Öffnung, durch die Licht ins Auge fällt", answer:"Pupille"},
+    {id:"s4", label:"Bündelt das Licht auf die Netzhaut", answer:"Linse"},
+    {id:"s5", label:"Innenauskleidung mit Millionen Sinneszellen", answer:"Netzhaut"},
+    {id:"s6", label:"Leitet Signale vom Auge zum Gehirn", answer:"Sehnerv"},
+    {id:"s7", label:"Sinneszellen für Hell/Dunkel und Farben", answer:"Stäbchen & Zapfen"},
+    {id:"s8", label:"Verarbeitet die Signale und erzeugt das Bild", answer:"Gehirn"},
+  ];
+
+  let sel = null, filled = {}, used = {};
+
+  function render() {
+    c.innerHTML = `
+    <div class="card">
+      <div class="step-badge">🏷️ Zuordnungsaufgabe</div>
+      <h3>Was gehört wohin?</h3>
+      <p style="color:var(--text2);margin-bottom:1rem">
+        <strong style="color:var(--text)">So geht's:</strong> Klicke zuerst auf einen Begriff (er leuchtet dann auf), dann auf das passende Feld darunter.
+      </p>
+
+      <div class="img-container">
+        <img src="Zuordnung.jpg" alt="Auge Zuordnung" onclick="openImg(this.src)" style="max-height:280px;object-fit:contain;" title="Klicken für Vollbild – nutze das Bild als Hilfe!">
+        <div class="img-hint">🔍 Klicke auf das Bild für eine größere Ansicht – es hilft beim Zuordnen!</div>
+      </div>
+
+      <div class="zuordnung-area">
+        <div>
+          <div class="term-pool-label">📦 Begriffe zum Zuordnen</div>
+          <div class="term-pool">
+            ${terms.map(t=>`<div class="term-chip ${sel===t?'selected':''} ${used[t]?'used':''}" onclick="__zsel('${t}')">${t}</div>`).join('')}
+          </div>
+        </div>
+        <div class="slots-list">
+          ${slots.map((s,i)=>{
+            const v=filled[s.id], ok=v&&v===s.answer, bad=v&&v!==s.answer;
+            return `<div class="slot-row ${ok?'correct':bad?'wrong':''}" onclick="__zdrop('${s.id}')">
+              <span class="slot-num">${i+1}</span>
+              <span class="slot-label">${s.label}</span>
+              <span class="slot-value">${v ? v+' '+(ok?'✓':bad?'✗':'') : '<span style="color:var(--border)">— klicken —</span>'}</span>
+            </div>`;
+          }).join('')}
+        </div>
+      </div>
+      <div id="zfb" style="margin-top:.75rem"></div>
+      <div class="nav-row">
+        <button class="btn-save" onclick="__zcheck()">Überprüfen ✓</button>
+      </div>
+    </div>`;
+  }
+
+  window.__zsel = t => { if(used[t]) return; sel = sel===t ? null : t; render(); };
+  window.__zdrop = id => {
+    if(!sel) return;
+    Object.keys(filled).forEach(k=>{ if(filled[k]===sel) delete filled[k]; });
+    filled[id] = sel;
+    terms.forEach(t=>{ used[t] = Object.values(filled).includes(t); });
+    sel = null; render();
   };
-  window.__chk = () => {
-    let ok=0; step.slots.forEach(s=>{if(filled[s.id]===s.answer)ok++;});
-    const total=step.slots.length, fb=document.getElementById("zfb");
-    if(ok===total){fb.innerHTML=`<div class="feedback-box correct show">🎉 Perfekt! Alle ${total} richtig!</div>`;moduleScore+=total;setTimeout(()=>nextStep(),1500);}
-    else{step.slots.forEach(s=>{if(filled[s.id]&&filled[s.id]!==s.answer){used[filled[s.id]]=false;delete filled[s.id];}});render();document.getElementById("zfb").innerHTML=`<div class="feedback-box wrong show">${ok}/${total} richtig – falsche zurückgesetzt, versuch nochmal!</div>`;}
+  window.__zcheck = () => {
+    let ok = 0;
+    slots.forEach(s=>{ if(filled[s.id]===s.answer) ok++; });
+    const fb = document.getElementById("zfb");
+    if(ok === slots.length) {
+      fb.innerHTML = `<div class="fb correct show">🎉 Perfekt! Alle ${slots.length} Begriffe richtig zugeordnet!</div>`;
+      totalScore += slots.length;
+      setTimeout(()=>nextStep(), 1600);
+    } else {
+      slots.forEach(s=>{if(filled[s.id]&&filled[s.id]!==s.answer){used[filled[s.id]]=false;delete filled[s.id];}});
+      render();
+      document.getElementById("zfb").innerHTML=`<div class="fb wrong show">${ok}/${slots.length} richtig – falsche Felder zurückgesetzt. Schau nochmal ins Bild und versuche es erneut!</div>`;
+    }
   };
   render();
 }
 
-function renderQuizStep(step, c) {
-  let qi=0, ans=[];
+// ═══════════════════════════════════════
+//  STEP 3 – QUIZ 1
+// ═══════════════════════════════════════
+function renderQuiz1(c) {
+  const qs = [
+    {q:"Was macht die Iris im Auge?",
+     opts:["Sie bündelt das Licht auf die Netzhaut","Sie regelt die Pupillengröße und bestimmt die Augenfarbe","Sie schützt das Auge von außen","Sie wandelt Licht in Signale um"],
+     c:1, fb:"Die Iris ist der farbige Ringmuskel – sie gibt dem Auge seine Farbe und steuert, wie viel Licht durch die Pupille fällt."},
+    {q:"Welche zwei Arten von Sinneszellen sitzen auf der Netzhaut?",
+     opts:["Nerven und Fasern","Stäbchen und Zapfen","Hornhaut und Linse","Iris und Pupille"],
+     c:1, fb:"Auf der Netzhaut sitzen Stäbchen (für Hell-Dunkel) und Zapfen (für Farben)."},
+    {q:"Wozu dient das Gehirn beim Sehen?",
+     opts:["Es produziert die Tränenflüssigkeit","Es regelt die Pupillengröße","Es verarbeitet die Signale vom Sehnerv und erzeugt das Bild","Es bündelt das Licht"],
+     c:2, fb:"Ohne Gehirn ergeben die Signale des Auges kein Bild – das Gehirn ist die eigentliche 'Bildverarbeitungseinheit'!"},
+  ];
+  runQuiz(c, "❓ Fragen zum Aufbau", qs, 1);
+}
+
+// ═══════════════════════════════════════
+//  STEP 4 – VIDEO
+// ═══════════════════════════════════════
+function renderVideo(c) {
+  c.innerHTML = `
+  <div class="card">
+    <div class="step-badge">🎬 Erklär-Video</div>
+    <h3>So funktioniert das Sehen</h3>
+    <p style="color:var(--text2);margin-bottom:1rem">Schau dir das Video aufmerksam an – anschließend kommen Fragen zu den wichtigsten Inhalten!</p>
+
+    <div class="video-wrap">
+      <iframe src="https://www.youtube-nocookie.com/embed/8Yn60LL71UU" 
+        title="Wie funktioniert das Auge?" frameborder="0"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowfullscreen></iframe>
+    </div>
+
+    <div class="info-box" style="margin-top:1rem">
+      📝 <strong>Darauf achten im Video:</strong>
+      <ul style="margin-top:.5rem;padding-left:1.1rem;">
+        <li>Welche Aufgabe hat das Augenlid? Was macht die Tränenflüssigkeit?</li>
+        <li>Was passiert mit dem Bild auf der Netzhaut – steht es aufrecht?</li>
+        <li>Wie reagiert die Pupille auf unterschiedlich helles Licht?</li>
+        <li>Was unterscheidet Stäbchen und Zapfen?</li>
+      </ul>
+    </div>
+
+    <div class="nav-row">
+      <button class="btn-next" onclick="nextStep()">Video gesehen – weiter zu den Fragen →</button>
+    </div>
+  </div>`;
+}
+
+// ═══════════════════════════════════════
+//  STEP 5 – QUIZ 2 (VIDEO-FRAGEN)
+// ═══════════════════════════════════════
+function renderQuiz2(c) {
+  const qs = [
+    {q:"Was ist die Aufgabe des Augenlids und der Tränenflüssigkeit?",
+     opts:["Das Augenlid bündelt Licht; Tränen sorgen für Farben","Das Augenlid schützt das Auge durch Schließen; Tränen halten die Oberfläche feucht und sauber","Das Augenlid leitet Licht weiter; Tränen aktivieren die Zapfen","Beide haben keine besondere Funktion"],
+     c:1, fb:"Das Augenlid ist ein reflexartiger Schutz – es schließt sich blitzschnell. Tränenflüssigkeit hält die Augenoberfläche feucht und schützt sie vor Keimen."},
+    {q:"Wie erscheint das Bild auf der Netzhaut?",
+     opts:["Aufrecht und farbig","Auf dem Kopf stehend und seitenverkehrt","Verschwommen und in Schwarz-Weiß","Vergrößert und hell"],
+     c:1, fb:"Die Linse wirft das Bild umgekehrt auf die Netzhaut – erst das Gehirn dreht es wieder in die richtige Position!"},
+    {q:"Was passiert mit der Pupille, wenn es sehr hell wird?",
+     opts:["Sie wird größer, um mehr Licht hereinzulassen","Sie wird kleiner, damit nicht zu viel Licht ins Auge fällt","Sie verändert ihre Farbe","Sie verschwindet"],
+     c:1, fb:"Bei hellem Licht zieht sich die Iris zusammen – die Pupille wird kleiner. Bei Dunkelheit öffnet sie sich weit."},
+    {q:"Wofür sind die Zapfen zuständig?",
+     opts:["Für das Sehen bei Dunkelheit","Für das Farbsehen bei gutem Licht","Für das Weiterleiten der Signale","Für das Scharfstellen der Linse"],
+     c:1, fb:"Die Zapfen ermöglichen das Farbsehen – es gibt drei Typen für Rot, Grün und Blau. Die Stäbchen hingegen sehen nur Hell/Dunkel, aber auch bei sehr schwachem Licht."},
+  ];
+  runQuiz(c, "❓ Fragen zum Video", qs, 2);
+}
+
+// ═══════════════════════════════════════
+//  GENERIC QUIZ RUNNER
+// ═══════════════════════════════════════
+function runQuiz(c, label, qs, quizId) {
+  let qi = 0, correct = 0;
   function rq() {
-    if(qi>=step.questions.length){moduleScore+=ans.filter(Boolean).length;c.innerHTML=`<div class="step-card"><div class="step-label">✅ Abschnitt done</div><h3>${ans.filter(Boolean).length}/${step.questions.length} richtig</h3><p style="color:var(--text2)">Weiter!</p><div class="nav-buttons"><button class="btn-next" onclick="nextStep()">Weiter →</button></div></div>`;return;}
-    const q=step.questions[qi];
-    c.innerHTML=`<div class="step-card"><div class="step-label">${step.label} (${qi+1}/${step.questions.length})</div>
-      <div class="quiz-question">${q.q}</div>
-      <div class="answer-options">${q.options.map((o,i)=>`<button class="answer-btn" onclick="__qa(${i})">${o}</button>`).join('')}</div>
-      <div class="feedback-box" id="qfb"></div></div>`;
+    if(qi >= qs.length) {
+      totalScore += correct;
+      savedData.quizScores[quizId] = `${correct}/${qs.length}`;
+      c.innerHTML = `<div class="card">
+        <div class="step-badge">${label}</div>
+        <div style="text-align:center;padding:1rem 0">
+          <div style="font-size:2.5rem;margin-bottom:.5rem">${correct===qs.length?'🎉':'👍'}</div>
+          <h3>${correct}/${qs.length} Fragen richtig</h3>
+          <p style="color:var(--text2);margin-top:.4rem">${correct===qs.length?'Perfekt!':'Gut gemacht – weiter geht\'s!'}</p>
+        </div>
+        <div class="nav-row"><button class="btn-next" onclick="nextStep()">Weiter →</button></div>
+      </div>`;
+      return;
+    }
+    const q = qs[qi];
+    c.innerHTML = `<div class="card">
+      <div class="step-badge">${label} (${qi+1}/${qs.length})</div>
+      <div class="quiz-q">${q.q}</div>
+      <div class="options">${q.opts.map((o,i)=>`<button class="opt-btn" onclick="__qa(${i})">${o}</button>`).join('')}</div>
+      <div class="fb" id="qfb"></div>
+    </div>`;
   }
   window.__qa = idx => {
-    const q=step.questions[qi];
-    document.querySelectorAll(".answer-btn").forEach(b=>b.disabled=true);
-    document.querySelectorAll(".answer-btn")[idx].classList.add(idx===q.correct?"correct":"wrong");
-    document.querySelectorAll(".answer-btn")[q.correct].classList.add("correct");
-    const fb=document.getElementById("qfb"); fb.textContent=q.feedback; fb.className=`feedback-box show ${idx===q.correct?"correct":"wrong"}`;
-    ans.push(idx===q.correct); setTimeout(()=>{qi++;rq();},2000);
+    const q = qs[qi];
+    document.querySelectorAll(".opt-btn").forEach(b=>b.disabled=true);
+    document.querySelectorAll(".opt-btn")[idx].classList.add(idx===q.c?"correct":"wrong");
+    document.querySelectorAll(".opt-btn")[q.c].classList.add("correct");
+    const fb = document.getElementById("qfb");
+    fb.textContent = q.fb; fb.className = `fb show ${idx===q.c?"correct":"wrong"}`;
+    if(idx===q.c) correct++;
+    setTimeout(()=>{ qi++; rq(); }, 2200);
   };
   rq();
 }
 
-function renderExperimentStep(step, c) {
-  let hyp="", beob="", hypOk=false, beobOk=false, pAns=[];
-  const wc = t => t.trim().split(/\s+/).filter(w=>w.length>0).length;
+// ═══════════════════════════════════════
+//  STEP 6 – EXPERIMENT INTRO (HYPOTHESE)
+// ═══════════════════════════════════════
+function renderExpIntro(c) {
+  c.innerHTML = `
+  <div class="card">
+    <div class="step-badge">🔬 Experiment – Vorbereitung</div>
+    <h3>Der blinde Fleck – Experiment zum Auge</h3>
+
+    <div class="exp-phase">
+      <div class="phase-title" style="color:var(--accent)">🔍 Fragestellung</div>
+      <div class="info-box" style="font-size:1rem;font-weight:700;color:var(--text)">
+        Hat unser Auge eine Stelle, an der es nichts sieht – obwohl das Auge offen ist?
+      </div>
+    </div>
+
+    <div class="exp-phase">
+      <div class="phase-title" style="color:var(--accent4)">💭 Deine Hypothese</div>
+      <p style="color:var(--text2);margin-bottom:.75rem">Bevor du das Experiment machst: Was glaubst du? Was wird passieren?</p>
+      <div class="warn-box">🧠 <strong>Tipp zum Nachdenken:</strong> Du hast gerade gelernt, wo der Sehnerv das Auge verlässt. Könnten dort vielleicht <em>keine</em> Sinneszellen sitzen? Was würde das für dein Sehen bedeuten – und würde es dir im Alltag auffallen?</div>
+
+      <p style="color:var(--text2);font-size:.88rem;margin-bottom:.4rem">💡 <em>Hilfswörter – klicke sie an, um sie in dein Textfeld einzufügen:</em></p>
+      <div class="helper-words" id="hwHyp">
+        ${["Ich vermute, dass","der blinde Fleck","der Sehnerv","keine Sinneszellen","verschwinden wird","nicht auffällt","das Gehirn","ausgleicht","sichtbar bleibt","wahrscheinlich"].map(w=>`<span class="helper-word" onclick="insertHelper('hypText','${w}')">${w}</span>`).join('')}
+      </div>
+
+      <div class="field-wrap">
+        <label>Meine Hypothese:</label>
+        <textarea id="hypText" rows="4" placeholder="Schreibe deine Vermutung hier auf...">${savedData.hypothese}</textarea>
+        <div class="hint">Schreibe in vollständigen Sätzen. Begründe deine Vermutung!</div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="btn-save" onclick="saveHyp()">Hypothese speichern & weiter →</button>
+    </div>
+  </div>`;
+}
+
+function saveHyp() {
+  const txt = document.getElementById("hypText").value.trim();
+  if(txt.length < 10) { alert("Bitte schreibe deine Hypothese auf!"); return; }
+  savedData.hypothese = txt;
+  nextStep();
+}
+
+// ═══════════════════════════════════════
+//  STEP 7 – EXPERIMENT MAIN
+// ═══════════════════════════════════════
+function renderExpMain(c) {
+  const checkItems = [
+    "Nimm ein Blatt Papier und einen Stift.",
+    "Zeichne auf der <strong>linken Seite</strong> ein großes <strong>+ (Kreuz)</strong> und auf der <strong>rechten Seite</strong> einen großen <strong>● (Punkt)</strong>. Der Abstand beider Zeichen soll etwa <strong>15 cm</strong> betragen.",
+    "Halte das Papier in <strong>Armabstand</strong> vor dich hin.",
+    "Schließe dein <strong>rechtes Auge</strong> (oder halte eine Hand darüber).",
+    "Schaue mit dem <strong>linken Auge fest auf das +</strong> – blicke nicht ab!",
+    "Bewege das Papier jetzt <strong>langsam auf dich zu</strong> – halte den Blick die ganze Zeit auf dem +.",
+    "Beobachte: <strong>Was passiert mit dem Punkt auf der rechten Seite?</strong> Notiere dir genau, ab welchem Abstand etwas passiert.",
+  ];
+
+  let checked = new Array(checkItems.length).fill(false);
+
   function render() {
-    let html=`<div class="step-card"><div class="step-label">${step.label}</div><h3>🔬 ${step.title}</h3>
-    <div class="experiment-phase"><h4>🔍 Fragestellung</h4><p>${step.fragestellung}</p></div>
-    <div class="experiment-phase"><h4>🧰 Material</h4><p style="color:var(--text2)">${step.material}</p></div>
-    <div class="experiment-phase"><h4>💭 Meine Hypothese</h4>
-      <p style="color:var(--text2);font-size:.9rem;margin-bottom:.5rem">Was glaubst du: Was wird passieren? (mind. ${step.minWordsHypothese} Wörter)</p>
-      <div class="textarea-wrap"><textarea id="hta" rows="3" placeholder="Ich vermute, dass..."></textarea>
-      <div class="word-counter" id="hwc">0 / ${step.minWordsHypothese} Wörter</div></div>
-      ${hypOk?'<div class="feedback-box correct show">✅ Hypothese gespeichert!</div>':`<button class="btn-next" style="margin-top:.5rem" onclick="__sh()">Hypothese speichern →</button>`}
+    c.innerHTML = `
+    <div class="card">
+      <div class="step-badge">🔬 Experiment – Durchführung</div>
+      <h3>Führe das Experiment durch!</h3>
+
+      <div class="exp-phase">
+        <div class="phase-title" style="color:var(--accent5)">🧰 Material</div>
+        <p style="color:var(--text2)">Ein Blatt Papier (weiß, DIN A4), ein Stift</p>
+      </div>
+
+      <div class="exp-phase">
+        <div class="phase-title" style="color:var(--accent5)">✏️ Zeichenaufgabe – Versuchsaufbau</div>
+        <p style="color:var(--text2);margin-bottom:.75rem">So soll dein Blatt aussehen – orientiere dich am Bild:</p>
+        <div class="img-container">
+          <img src="Versuchsaufbau.jpg" alt="Versuchsaufbau blinder Fleck" onclick="openImg(this.src)" style="max-height:220px;object-fit:contain;">
+          <div class="img-hint">🔍 Klicken für Vollbild</div>
+        </div>
+        <div class="info-box" style="margin-top:.75rem">
+          <strong>Zeichne auf dein Blatt:</strong>
+          <ul style="margin-top:.4rem;padding-left:1.1rem;">
+            <li>Links: ein großes <strong>schwarzes +</strong> (ca. 1 cm groß)</li>
+            <li>Rechts: einen großen <strong>schwarzen Punkt ●</strong> (ca. 1 cm groß)</li>
+            <li>Abstand der beiden Zeichen: ca. <strong>15 cm</strong></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="exp-phase">
+        <div class="phase-title" style="color:var(--accent5)">⚗️ Schritt-für-Schritt – Hake jeden Schritt ab!</div>
+        <div class="checklist">
+          ${checkItems.map((txt,i)=>`
+            <div class="check-item ${checked[i]?'done':''}" onclick="__toggleCheck(${i})">
+              <input type="checkbox" ${checked[i]?'checked':''} onclick="event.stopPropagation();__toggleCheck(${i})">
+              <span class="step-text">${txt}</span>
+            </div>`).join('')}
+        </div>
+      </div>
+
+      <div class="exp-phase" style="margin-top:1.5rem">
+        <div class="phase-title" style="color:var(--accent4)">👁️ Beobachtung aufschreiben</div>
+        <p style="color:var(--text2);margin-bottom:.5rem">Was hast du beobachtet? Beschreibe so genau wie möglich!</p>
+        <div class="helper-words">
+          ${["Bei einem Abstand von ca.","der Punkt","verschwand plötzlich","war nicht mehr sichtbar","tauchte wieder auf","das Auge schaute auf das +","ich musste das Papier","langsam auf mich zuziehen","der rechte Teil","war nicht zu sehen"].map(w=>`<span class="helper-word" onclick="insertHelper('beobText','${w}')">${w}</span>`).join('')}
+        </div>
+        <div class="field-wrap">
+          <label>Meine Beobachtung:</label>
+          <textarea id="beobText" rows="4" placeholder="Ich habe beobachtet, dass...">${savedData.beobachtung}</textarea>
+          <div class="hint">Beschreibe genau, was mit dem Punkt passiert ist und bei welchem Abstand.</div>
+        </div>
+      </div>
+
+      <div class="nav-row">
+        <button class="btn-save" onclick="saveBeob()">Beobachtung speichern → Erklärung freischalten 🔓</button>
+      </div>
     </div>`;
-    if(hypOk){html+=`<div class="experiment-phase" style="margin-top:1rem"><h4>⚗️ Durchführung</h4><ul class="steps-list">${step.anleitung.map(s=>`<li>${s}</li>`).join('')}</ul></div>
-    <div class="experiment-phase" style="margin-top:1rem"><h4>👁️ Meine Beobachtung</h4>
-      <p style="color:var(--text2);font-size:.9rem;margin-bottom:.5rem">Beschreibe genau, was du beobachtet hast! (mind. ${step.minWordsBeobachtung} Wörter)</p>
-      <div class="textarea-wrap"><textarea id="bta" rows="4" placeholder="Ich habe beobachtet, dass..."></textarea>
-      <div class="word-counter" id="bwc">0 / ${step.minWordsBeobachtung} Wörter</div></div>
-      ${beobOk?'<div class="feedback-box correct show">✅ Beobachtung gespeichert – Erklärung freigeschaltet! 🔓</div>':`<button class="btn-next" style="margin-top:.5rem" onclick="__sb()">Beobachtung speichern →</button>`}
-    </div>`;}
-    if(beobOk){html+=`<div class="experiment-phase" style="margin-top:1.5rem;border-color:var(--accent2)"><h4 style="color:var(--accent2)">💡 Erklärung (freigeschaltet!)</h4>${step.erklaerung.content}</div>
-    <div class="experiment-phase" style="margin-top:1.5rem;border-color:var(--accent4)"><h4 style="color:var(--accent4)">🔎 Hypothese prüfen</h4>`;
-    step.hypothesePruefung.forEach((q,qi)=>{const a=pAns[qi];html+=`<p style="font-weight:700;margin:.75rem 0 .5rem">${qi+1}. ${q.q}</p><div class="answer-options">${q.options.map((o,i)=>{let cls='';if(a!==undefined){if(i===q.correct)cls='correct';else if(i===a&&a!==q.correct)cls='wrong';}return`<button class="answer-btn ${cls}" ${a!==undefined?'disabled':''} onclick="__ap(${qi},${i})">${o}</button>`;}).join('')}</div>${a!==undefined?`<div class="feedback-box show ${a===q.correct?'correct':'wrong'}">${q.feedback}</div>`:''}`; });
-    if(pAns.length===step.hypothesePruefung.length){html+=`<div style="margin-top:1.25rem"><h4 style="color:var(--accent4);margin-bottom:.5rem">✍️ Mein Fazit</h4><p style="color:var(--text2);font-size:.9rem;margin-bottom:.5rem">War deine Hypothese richtig? Begründe!</p><div class="textarea-wrap"><textarea id="fta" rows="3" placeholder="Meine Hypothese war... weil..."></textarea></div><button class="btn-next" style="margin-top:.5rem" onclick="nextStep()">Experiment abschließen ✓</button></div>`;}
-    html+=`</div>`;}
-    html+=`</div>`; c.innerHTML=html;
-    const ht=document.getElementById("hta"),hw=document.getElementById("hwc");
-    if(ht){ht.value=hyp;ht.addEventListener("input",function(){hyp=this.value;const w=wc(this.value);hw.textContent=`${w} / ${step.minWordsHypothese} Wörter`;hw.className=`word-counter${w>=step.minWordsHypothese?' ok':''}`;});const w=wc(ht.value);hw.textContent=`${w} / ${step.minWordsHypothese} Wörter`;hw.className=`word-counter${w>=step.minWordsHypothese?' ok':''}`;}
-    const bt=document.getElementById("bta"),bw=document.getElementById("bwc");
-    if(bt){bt.value=beob;bt.addEventListener("input",function(){beob=this.value;const w=wc(this.value);bw.textContent=`${w} / ${step.minWordsBeobachtung} Wörter`;bw.className=`word-counter${w>=step.minWordsBeobachtung?' ok':''}`;});const w=wc(bt.value);bw.textContent=`${w} / ${step.minWordsBeobachtung} Wörter`;bw.className=`word-counter${w>=step.minWordsBeobachtung?' ok':''}`;}
   }
-  window.__sh=()=>{hyp=document.getElementById("hta")?.value||"";if(wc(hyp)<step.minWordsHypothese){alert(`Bitte mind. ${step.minWordsHypothese} Wörter!`);return;}hypOk=true;render();};
-  window.__sb=()=>{beob=document.getElementById("bta")?.value||"";if(wc(beob)<step.minWordsBeobachtung){alert(`Bitte mind. ${step.minWordsBeobachtung} Wörter!`);return;}beobOk=true;render();};
-  window.__ap=(qi,idx)=>{if(pAns[qi]!==undefined)return;pAns[qi]=idx;if(idx===step.hypothesePruefung[qi].correct)moduleScore++;render();setTimeout(()=>c.scrollIntoView({behavior:'smooth',block:'end'}),100);};
+
+  window.__toggleCheck = i => { checked[i] = !checked[i]; render(); };
   render();
 }
 
+function saveBeob() {
+  const txt = document.getElementById("beobText").value.trim();
+  if(txt.length < 10) { alert("Bitte schreibe deine Beobachtung auf!"); return; }
+  savedData.beobachtung = txt;
+  nextStep();
+}
+
+// ═══════════════════════════════════════
+//  STEP 8 – ERKLÄRUNG & HYPOTHESE PRÜFEN
+// ═══════════════════════════════════════
+function renderExpExplain(c) {
+  let hypCorrect = null;
+
+  function render() {
+    c.innerHTML = `
+    <div class="card unlock-reveal">
+      <div class="step-badge">💡 Erklärung – freigeschaltet!</div>
+      <h3>Was steckt hinter dem blinden Fleck?</h3>
+
+      <div class="hyp-display">
+        <div class="hyp-label">📝 Deine Hypothese war:</div>
+        <div class="hyp-text">"${savedData.hypothese}"</div>
+      </div>
+
+      <div class="exp-phase" style="margin-top:1.25rem">
+        <div class="phase-title" style="color:var(--accent2)">💡 Die Erklärung</div>
+        <p>An einer bestimmten Stelle verschwand der Punkt – das ist dein <strong>blinder Fleck</strong>!</p>
+        <p style="margin-top:.6rem">An genau der Stelle, wo der <strong>Sehnerv</strong> aus dem Auge heraustritt (der sogenannte <strong>Sehnervkopf</strong>), befinden sich <em>keine Sinneszellen</em>. Das Auge ist dort buchstäblich "blind".</p>
+
+        <div class="img-container" style="margin-top:1rem">
+          <img src="blinderfleck.jpg" alt="Der blinde Fleck am Sehnervkopf" onclick="openImg(this.src)" style="max-height:240px;object-fit:contain;">
+          <div class="img-hint">🔍 Der blinde Fleck – wo der Sehnerv das Auge verlässt</div>
+        </div>
+
+        <p style="margin-top:.75rem">Im Alltag bemerkst du den blinden Fleck normalerweise <em>nicht</em> – aus zwei Gründen:</p>
+        <ul style="margin:.5rem 0 .5rem 1.1rem;">
+          <li>Beide Augen ergänzen sich gegenseitig – was ein Auge nicht sieht, sieht das andere</li>
+          <li>Das <strong>Gehirn füllt die Lücke aktiv auf</strong> – es "erfindet" das, was fehlt, basierend auf der Umgebung</li>
+        </ul>
+        <div class="info-box" style="margin-top:.75rem">💡 Dein Gehirn ist so gut darin, Lücken aufzufüllen, dass du diesen Effekt im Alltag nie bemerkst – obwohl du ihn jetzt gerade selbst erlebt hast!</div>
+      </div>
+
+      <div class="exp-phase" style="margin-top:1.5rem;border-left-color:var(--accent4)">
+        <div class="phase-title" style="color:var(--accent4)">🔎 Hypothese überprüfen</div>
+        <p style="color:var(--text2);margin-bottom:.75rem">Vergleiche das Ergebnis mit deiner Hypothese von vorhin:</p>
+
+        ${hypCorrect === null ? `
+        <p style="font-weight:700;margin-bottom:.6rem">War deine Hypothese richtig?</p>
+        <div class="options">
+          <button class="opt-btn" onclick="__setHyp(true)">✅ Ja – meine Vermutung war richtig</button>
+          <button class="opt-btn" onclick="__setHyp(false)">❌ Nein – das Ergebnis hat mich überrascht</button>
+          <button class="opt-btn" onclick="__setHyp('teilweise')">🔶 Teilweise – ich lag nicht ganz falsch</button>
+        </div>` : `
+        <div class="success-box">${hypCorrect===true?'✅ Du hast es richtig vermutet – gut gedacht!':hypCorrect==='teilweise'?'🔶 Du lagst teilweise richtig – das ist auch gut!':'❌ Deine Hypothese hat nicht gepasst – aber jetzt weißt du es!'}</div>
+        
+        <div class="field-wrap" style="margin-top:1rem">
+          <label>Begründung – erkläre in eigenen Worten:</label>
+          <div class="helper-words">
+            ${["Der blinde Fleck entsteht","weil dort","keine Sinneszellen","der Sehnerv","aus dem Auge tritt","das Gehirn füllt","die Lücke auf","meine Hypothese war","weil ich dachte","anders als erwartet"].map(w=>`<span class="helper-word" onclick="insertHelper('fazitText','${w}')">${w}</span>`).join('')}
+          </div>
+          <textarea id="fazitText" rows="4" placeholder="Ich kann jetzt erklären, dass...">${savedData.fazit}</textarea>
+        </div>
+        <div class="nav-row">
+          <button class="btn-save" onclick="saveFazit()">Speichern & zum Abschluss →</button>
+        </div>`}
+      </div>
+    </div>`;
+  }
+
+  window.__setHyp = val => { hypCorrect = val; if(val) totalScore += 2; render(); };
+  render();
+}
+
+function saveFazit() {
+  savedData.fazit = document.getElementById("fazitText")?.value?.trim() || "";
+  nextStep();
+}
+
+// ═══════════════════════════════════════
+//  STEP 9 – REFLEXION
+// ═══════════════════════════════════════
+function renderReflection(c) {
+  const questions = [
+    {id:"verstanden", label:"Ich habe den Aufbau des Auges verstanden"},
+    {id:"spass",      label:"Das Experiment hat mir Spaß gemacht"},
+    {id:"schwierig",  label:"Die Aufgaben waren für mich gut zu schaffen"},
+  ];
+
+  function renderStars(id, val) {
+    return Array.from({length:5},(_,i)=>`<span class="star ${i<val?'on':''}" onclick="__setStar('${id}',${i+1})">★</span>`).join('');
+  }
+
+  function render() {
+    c.innerHTML = `
+    <div class="card">
+      <div class="step-badge">✅ Reflexion & Abschluss</div>
+      <h3>Wie hat es dir gefallen?</h3>
+      <p style="color:var(--text2);margin-bottom:1.25rem">Bewerte ehrlich – deine Antworten helfen deinem Lehrer, den Unterricht zu verbessern.</p>
+
+      <div class="reflect-grid">
+        ${questions.map(q=>`
+          <div class="reflect-row">
+            <label>${q.label}</label>
+            <div class="star-row">${renderStars(q.id, savedData.reflection[q.id]||0)}</div>
+          </div>`).join('')}
+      </div>
+
+      <div class="field-wrap" style="margin-top:1.25rem">
+        <label>Was war besonders schwierig? Was hat dir gut gefallen?</label>
+        <textarea id="reflectText" rows="3" placeholder="Hier kannst du schreiben was du möchtest..."></textarea>
+      </div>
+
+      <div class="nav-row" style="margin-top:1.5rem">
+        <button class="btn-next" onclick="saveReflect()">Abschluss ansehen →</button>
+      </div>
+    </div>`;
+  }
+
+  window.__setStar = (id, val) => { savedData.reflection[id] = val; render(); };
+  render();
+}
+
+function saveReflect() {
+  savedData.reflectComment = document.getElementById("reflectText")?.value || "";
+  nextStep();
+}
+
+// ═══════════════════════════════════════
+//  COMPLETION
+// ═══════════════════════════════════════
 function renderCompletion() {
-  const m = currentModule;
-  completedModules[m.id] = moduleScore;
-  localStorage.setItem("sinnes_completed", JSON.stringify(completedModules));
-  fetch(SCRIPT_URL,{method:"POST",mode:"no-cors",headers:{"Content-Type":"application/json"},body:JSON.stringify({name:`${playerName} ${m.icon}`,score:moduleScore,module:m.title})}).catch(()=>{});
-  document.getElementById("stepContainer").innerHTML=`<div class="completion-card"><div class="big-icon">${m.icon}</div><h2>${m.title} abgeschlossen!</h2><p>Super gemacht, ${playerName}!</p><div class="score-display"><div class="score-num">${moduleScore}</div><div class="score-label">Punkte erreicht</div></div><button class="btn-next" onclick="showModules()">Zurück zur Übersicht →</button></div>`;
   updateProgress();
+  document.getElementById("progFill").style.width = "100%";
+  document.getElementById("progLabel").textContent = TOTAL + "/" + TOTAL;
+
+  document.getElementById("stepContainer").innerHTML = `
+  <div class="completion-card">
+    <div class="big-icon">👁️</div>
+    <h2>Modul abgeschlossen!</h2>
+    <p style="color:var(--text2);margin-bottom:1.5rem">Super gemacht, ${studentName}!</p>
+    <div style="background:var(--surface2);border-radius:12px;padding:1.25rem;margin-bottom:1.5rem">
+      <div class="score-ring">${totalScore}</div>
+      <div style="color:var(--text2);font-size:.9rem;margin-top:.25rem">Punkte gesamt</div>
+    </div>
+    <p style="color:var(--text2);margin-bottom:1.5rem">Lade jetzt dein ausgefülltes Protokoll als PDF herunter – für deine Mappe!</p>
+    <div class="nav-row" style="justify-content:center">
+      <button class="btn-pdf" onclick="generatePDF()">📄 Protokoll als PDF herunterladen</button>
+    </div>
+  </div>`;
 }
 
-async function showHighscore() {
-  document.getElementById("moduleScreen").style.display="none";
-  document.getElementById("highscoreScreen").style.display="block";
-  const tabs=document.getElementById("hsTabs"),cont=document.getElementById("hsContent");
-  tabs.innerHTML=`<div class="tab-btn active" onclick="hsTab('all',this)">Alle</div>${modules.map(m=>`<div class="tab-btn" onclick="hsTab('${m.id}',this)">${m.icon} ${m.title}</div>`).join('')}`;
-  cont.innerHTML=`<p style="color:var(--text2)">Lade...</p>`;
-  try{const r=await fetch(SCRIPT_URL);window.__hsd=(await r.json()).slice(1);hsTab('all',tabs.querySelector('.tab-btn'));}
-  catch(e){cont.innerHTML=`<p style="color:var(--accent3)">Konnte nicht geladen werden.</p>`;}
+// ═══════════════════════════════════════
+//  HELPER: INSERT WORD INTO TEXTAREA
+// ═══════════════════════════════════════
+function insertHelper(textareaId, word) {
+  const ta = document.getElementById(textareaId);
+  if(!ta) return;
+  const pos = ta.selectionStart;
+  const before = ta.value.substring(0, pos);
+  const after = ta.value.substring(pos);
+  const sep = before.length > 0 && !before.endsWith(" ") ? " " : "";
+  ta.value = before + sep + word + " " + after;
+  ta.selectionStart = ta.selectionEnd = pos + sep.length + word.length + 1;
+  ta.focus();
 }
 
-function hsTab(id,btn) {
-  document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));btn.classList.add("active");
-  const data=window.__hsd||[];
-  const f=id==='all'?data:data.filter(r=>{const m=modules.find(m=>m.id===id);return m&&String(r[0]).includes(m.icon);});
-  const s=[...f].sort((a,b)=>(b[1]||0)-(a[1]||0)).slice(0,15),md=["🥇","🥈","🥉"];
-  document.getElementById("hsContent").innerHTML=`<table class="hs-table"><thead><tr><th>#</th><th>Name</th><th>Punkte</th><th>Datum</th></tr></thead><tbody>${s.map((r,i)=>`<tr><td>${md[i]||(i+1)}</td><td>${r[0]||"–"}</td><td><strong>${r[1]||0}</strong></td><td style="color:var(--text2);font-size:.85rem">${r[2]||"–"}</td></tr>`).join('')||'<tr><td colspan="4" style="color:var(--text2);text-align:center;padding:2rem">Noch keine Einträge</td></tr>'}</tbody></table>`;
+// ═══════════════════════════════════════
+//  IMAGE FULLSCREEN
+// ═══════════════════════════════════════
+function openImg(src) {
+  document.getElementById("overlayImg").src = src;
+  document.getElementById("imgOverlay").classList.add("show");
+}
+function closeImg() {
+  document.getElementById("imgOverlay").classList.remove("show");
+}
+
+// ═══════════════════════════════════════
+//  PDF GENERATION
+// ═══════════════════════════════════════
+function generatePDF() {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation:'portrait', unit:'mm', format:'a4' });
+  
+  const W = 210, H = 297;
+  const margin = 20, textW = W - 2*margin;
+  let y = 20;
+
+  // Helper functions
+  function checkPage(needed = 12) {
+    if(y + needed > H - 15) { doc.addPage(); y = 20; }
+  }
+
+  function hline(col = [48, 54, 61]) {
+    doc.setDrawColor(...col);
+    doc.setLineWidth(0.3);
+    doc.line(margin, y, W-margin, y);
+    y += 4;
+  }
+
+  function box(text, bgR, bgG, bgB, textColor=[230,237,243]) {
+    const lines = doc.splitTextToSize(text, textW - 10);
+    const bh = lines.length * 5 + 8;
+    checkPage(bh + 4);
+    doc.setFillColor(bgR, bgG, bgB);
+    doc.roundedRect(margin, y, textW, bh, 3, 3, 'F');
+    doc.setTextColor(...textColor);
+    doc.setFontSize(9.5);
+    doc.setFont("helvetica","normal");
+    lines.forEach((l,i) => { doc.text(l, margin+5, y+6+i*5); });
+    y += bh + 5;
+  }
+
+  function sectionTitle(icon, text, r=88, g=166, b=255) {
+    checkPage(14);
+    doc.setFillColor(r, g, b, 0.15);
+    doc.setTextColor(r, g, b);
+    doc.setFontSize(10);
+    doc.setFont("helvetica","bold");
+    doc.text(icon + " " + text, margin, y);
+    y += 2;
+    doc.setDrawColor(r, g, b);
+    doc.setLineWidth(0.5);
+    doc.line(margin, y, margin + doc.getTextWidth(icon + " " + text), y);
+    y += 6;
+    doc.setTextColor(180, 188, 198);
+    doc.setFont("helvetica","normal");
+  }
+
+  function textBlock(text, bold=false, size=9.5, color=[180,188,198]) {
+    doc.setTextColor(...color);
+    doc.setFontSize(size);
+    doc.setFont("helvetica", bold?"bold":"normal");
+    const lines = doc.splitTextToSize(text, textW);
+    lines.forEach(l => { checkPage(7); doc.text(l, margin, y); y += 5; });
+    y += 2;
+  }
+
+  function answerBox(label, content, filled=true) {
+    checkPage(24);
+    doc.setTextColor(139,148,158);
+    doc.setFontSize(8.5);
+    doc.setFont("helvetica","bold");
+    doc.text(label, margin, y); y += 4;
+    const lines = content ? doc.splitTextToSize(content, textW - 6) : [];
+    const bh = Math.max(20, lines.length * 5 + 8);
+    checkPage(bh + 4);
+    doc.setFillColor(30, 37, 48);
+    doc.setDrawColor(48, 54, 61);
+    doc.setLineWidth(0.3);
+    doc.roundedRect(margin, y, textW, bh, 2, 2, filled ? 'FD' : 'D');
+    if(content) {
+      doc.setTextColor(230, 237, 243);
+      doc.setFontSize(9.5);
+      doc.setFont("helvetica","normal");
+      lines.forEach((l,i) => doc.text(l, margin+4, y+5+i*5));
+    }
+    y += bh + 5;
+  }
+
+  // ── HEADER ──
+  doc.setFillColor(13, 17, 23);
+  doc.rect(0, 0, W, H, 'F');
+
+  doc.setFillColor(22, 27, 34);
+  doc.roundedRect(margin-5, y-5, textW+10, 38, 4, 4, 'F');
+  doc.setDrawColor(88, 166, 255);
+  doc.setLineWidth(0.5);
+  doc.roundedRect(margin-5, y-5, textW+10, 38, 4, 4, 'S');
+
+  doc.setTextColor(88, 166, 255);
+  doc.setFontSize(18);
+  doc.setFont("helvetica","bold");
+  doc.text("👁️  Sinnesdetektiv – Das Auge", margin, y+8);
+
+  doc.setTextColor(139, 148, 158);
+  doc.setFontSize(9);
+  doc.setFont("helvetica","normal");
+  doc.text(`Name: ${studentName}   |   Klasse: ${studentClass}   |   Datum: ${studentDate}`, margin, y+16);
+  doc.text(`Punkte: ${totalScore}`, margin, y+22);
+
+  y += 42;
+
+  // ── FRAGESTELLUNG ──
+  sectionTitle("🔍","Fragestellung", 88, 166, 255);
+  box("Hat unser Auge eine Stelle, an der es nichts sieht – obwohl das Auge offen ist?", 22, 27, 34, [230,237,243]);
+
+  // ── HYPOTHESE ──
+  sectionTitle("💭","Meine Hypothese", 210, 168, 255);
+  answerBox("Was habe ich vermutet?", savedData.hypothese || "");
+
+  // ── MATERIAL & VERSUCHSAUFBAU ──
+  sectionTitle("🧰","Material & Versuchsaufbau", 255, 166, 87);
+  textBlock("• Ein Blatt Papier (weiß, DIN A4)   • Ein Stift");
+  box("✏️  Zeichne: Links ein großes + und rechts einen großen ●, Abstand ca. 15 cm", 30, 37, 48, [255,166,87]);
+
+  // ── DURCHFÜHRUNG ──
+  sectionTitle("⚗️","Durchführung", 255, 166, 87);
+  const steps = [
+    "Halte das Blatt in Armabstand.",
+    "Schließe das rechte Auge.",
+    "Schaue mit dem linken Auge fest auf das +.",
+    "Bewege das Blatt langsam auf dich zu – Blick bleibt auf dem +!",
+    "Beobachte, was mit dem ● passiert.",
+  ];
+  steps.forEach((s,i) => {
+    checkPage(8);
+    doc.setFillColor(30, 37, 48);
+    doc.roundedRect(margin, y, textW, 7, 1.5, 1.5, 'F');
+    doc.setTextColor(255,166,87);
+    doc.setFontSize(8.5);
+    doc.setFont("helvetica","bold");
+    doc.text(`${i+1}`, margin+3, y+5);
+    doc.setTextColor(180,188,198);
+    doc.setFont("helvetica","normal");
+    doc.text(s, margin+12, y+5);
+    y += 9;
+  });
+  y += 3;
+
+  // ── BEOBACHTUNG ──
+  checkPage(30);
+  sectionTitle("👁️","Meine Beobachtung", 88, 166, 255);
+  answerBox("Was habe ich beobachtet?", savedData.beobachtung || "");
+
+  // ── ERKLÄRUNG ──
+  sectionTitle("💡","Erklärung", 63, 185, 80);
+  box("An der Stelle, wo der Sehnerv aus dem Auge tritt (Sehnervkopf), gibt es keine Sinneszellen – das ist der blinde Fleck. Das Gehirn füllt diese Lücke automatisch auf, sodass wir sie im Alltag nicht bemerken.", 22, 27, 34, [230,237,243]);
+
+  // ── HYPOTHESE PRÜFEN ──
+  checkPage(30);
+  sectionTitle("🔎","Hypothese prüfen", 210, 168, 255);
+  textBlock("Ursprüngliche Hypothese:", true, 9, [180,188,198]);
+  box(`"${savedData.hypothese || "–"}"`, 30, 25, 45, [210,168,255]);
+  answerBox("Begründung – war meine Hypothese richtig?", savedData.fazit || "");
+
+  // ── REFLEXION ──
+  checkPage(40);
+  sectionTitle("✅","Reflexion", 63, 185, 80);
+  const refLabels = {verstanden:"Ich habe den Aufbau des Auges verstanden", spass:"Das Experiment hat mir Spaß gemacht", schwierig:"Die Aufgaben waren gut zu schaffen"};
+  Object.entries(refLabels).forEach(([key, label]) => {
+    const val = savedData.reflection[key] || 0;
+    checkPage(10);
+    doc.setTextColor(139,148,158); doc.setFontSize(8.5); doc.setFont("helvetica","normal");
+    doc.text(label + ":", margin, y);
+    const stars = "★".repeat(val) + "☆".repeat(5-val);
+    doc.setTextColor(255, 166, 87);
+    doc.setFontSize(11);
+    doc.text(stars, W - margin - doc.getTextWidth(stars)*0.75, y);
+    y += 7;
+  });
+
+  // ── FOOTER ──
+  doc.setTextColor(48, 54, 61);
+  doc.setFontSize(8);
+  doc.setFont("helvetica","normal");
+  doc.text("Sinnesdetektiv – Biologie Klasse 5/6  |  mindcraft-fes", margin, H-8);
+  doc.text(`Seite 1`, W-margin, H-8, {align:"right"});
+
+  // ── SAVE ──
+  const fname = `Sinnesdetektiv_Auge_${studentName.replace(/\s+/g,'_')}_${studentClass}.pdf`;
+  doc.save(fname);
 }
 </script>
 </body>
