@@ -3,7 +3,17 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sinnesdetektiv – Das Auge 👁️</title>
+<title>Sinnesdetektiv – Das Auge</title>
+<link rel="manifest" href="manifest.json">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Sinnesdetektiv">
+<link rel="apple-touch-icon" href="SinnesLogo.png">
+<meta name="theme-color" content="#0d1117">
+<meta property="og:title" content="Sinnesdetektiv – Das Auge">
+<meta property="og:description" content="Entdecke Aufbau und Funktion des Auges">
+<meta property="og:type" content="website">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
@@ -668,22 +678,78 @@ function saveReflect(){
 }
 
 // ════════════════════════════════════════
+// GOOGLE SHEETS SAVE
+// ════════════════════════════════════════
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyVVhp-QCwpiIKXa9IfudSjVZT6bPnjkuGALue2C9TrskD5dsfqo8QxtkQ3Z1vpj9206A/exec";
+
+function saveToSheets(){
+  const payload = {
+    name: sName + " 👁️",
+    score: score,
+    module: "Das Auge",
+    klasse: sClass,
+    datum: sDate
+  };
+  fetch(SCRIPT_URL, {
+    method: "POST",
+    mode: "no-cors",
+    headers: {"Content-Type":"application/json"},
+    body: JSON.stringify(payload)
+  }).catch(()=>{});
+}
+
+// ════════════════════════════════════════
 // DONE
 // ════════════════════════════════════════
+const NEXT_MODULES = [
+  {icon:"👂", title:"Das Ohr",        desc:"Aufbau, Funktion & Hörexperiment"},
+  {icon:"👃", title:"Die Nase",       desc:"Aufbau, Funktion & Riechexperiment"},
+  {icon:"👅", title:"Die Zunge",      desc:"Aufbau, Funktion & Schmeckexperiment"},
+  {icon:"✋", title:"Die Haut",       desc:"Aufbau, Funktion & Tastexperiment"},
+  {icon:"🧠", title:"Gehirn & Nerven",desc:"Aufbau, Funktion & Gehirnexperiment"},
+];
+
 function renderDone(){
   document.getElementById("pFill").style.width="100%";
   document.getElementById("pLbl").textContent=TOTAL+"/"+TOTAL;
+
+  // Save to Google Sheets
+  saveToSheets();
+  // Also store locally that Auge is done
+  localStorage.setItem("sinnes_auge_done", score);
+
+  const moduleCards = NEXT_MODULES.map(m => `
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:1rem 1.1rem;display:flex;align-items:center;gap:.85rem;opacity:.55;">
+      <div style="font-size:1.8rem;filter:grayscale(1)">${m.icon}</div>
+      <div>
+        <div style="font-weight:700;font-size:.95rem;color:var(--text2)">${m.title}</div>
+        <div style="font-size:.8rem;color:var(--text2);margin-top:.15rem">${m.desc}</div>
+        <div style="font-size:.75rem;color:var(--border);margin-top:.3rem;font-weight:700;">🔒 Noch nicht verfügbar</div>
+      </div>
+    </div>`).join('');
+
   document.getElementById("stepBox").innerHTML=`
   <div class="done-card">
-    <div class="big">👁️</div>
-    <h2>Modul abgeschlossen!</h2>
+    <div class="big">&#9989;</div>
+    <h2>Das Auge – abgeschlossen!</h2>
     <p style="color:var(--text2);margin-bottom:1.25rem">Sehr gut gemacht, ${sName}!</p>
     <div style="background:var(--surface2);border-radius:12px;padding:1rem;margin-bottom:1.5rem">
       <div class="score-n">${score}</div>
-      <div style="color:var(--text2);font-size:.88rem;margin-top:.2rem">Punkte gesamt</div>
+      <div style="color:var(--text2);font-size:.88rem;margin-top:.2rem">Punkte erreicht</div>
     </div>
-    <p style="color:var(--text2);margin-bottom:1.25rem">Lade dein ausgefülltes Protokoll als PDF herunter – für deine Mappe!</p>
-    <button class="btn-pdf" onclick="makePDF()">📄 Protokoll als PDF herunterladen</button>
+    <button class="btn-pdf" onclick="makePDF()" style="width:100%;justify-content:center;margin-bottom:.65rem;">&#128196; Protokoll als PDF herunterladen</button>
+
+    <div style="margin-top:1.75rem;text-align:left;">
+      <div style="font-family:'Outfit',sans-serif;font-weight:800;font-size:1rem;margin-bottom:.85rem;color:var(--text)">
+        🔍 Weitere Sinnesdetektiv-Module
+      </div>
+      <div style="display:flex;flex-direction:column;gap:.5rem;">
+        ${moduleCards}
+      </div>
+      <p style="color:var(--text2);font-size:.8rem;margin-top:.85rem;text-align:center;">
+        Die weiteren Module werden von deinem Lehrer freigeschaltet.
+      </p>
+    </div>
   </div>`;
 }
 
@@ -700,245 +766,201 @@ function openImg(src){document.getElementById("overlayImg").src=src;document.get
 function closeImg(){document.getElementById("imgOverlay").classList.remove("show");}
 
 // ════════════════════════════════════════
-// PDF – clean build with ReportLab-style layout
-// ════════════════════════════════════════
+// PDF
 function makePDF(){
   const {jsPDF}=window.jspdf;
   const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
-  const W=210,H=297,ML=18,MR=192,TW=MR-ML;
-  let y=15;
+  const W=210,H=297,ML=15,MR=195,TW=MR-ML;
+  let y=14;
 
-  // ── color helpers ──
   const C={
-    bg:[13,17,23], surf:[22,27,34], surf2:[30,37,48],
-    border:[48,54,61], blue:[88,166,255], green:[63,185,80],
-    orange:[255,166,87], purple:[210,168,255], red:[247,129,102],
-    text:[220,230,240], text2:[139,148,158], white:[255,255,255]
+    bg:[13,17,23],surf:[22,27,34],surf2:[30,37,48],
+    border:[48,54,61],blue:[88,166,255],green:[63,185,80],
+    orange:[255,166,87],purple:[210,168,255],red:[247,129,102],
+    text:[220,230,240],text2:[139,148,158]
   };
 
-  function setFill(col){doc.setFillColor(...col);}
-  function setStroke(col,w=0.3){doc.setDrawColor(...col);doc.setLineWidth(w);}
-  function setTxt(col,sz,bold=false){doc.setTextColor(...col);doc.setFontSize(sz);doc.setFont("helvetica",bold?"bold":"normal");}
+  function setF(c){doc.setFillColor(...c);}
+  function setS(c,w=0.25){doc.setDrawColor(...c);doc.setLineWidth(w);}
+  function setT(c,sz,bold=false){doc.setTextColor(...c);doc.setFontSize(sz);doc.setFont("helvetica",bold?"bold":"normal");}
+  function chk(n=12){if(y+n>H-12){doc.addPage();setF(C.bg);doc.rect(0,0,W,H,"F");y=14;}}
 
-  function chk(need=12){if(y+need>H-12){doc.addPage();setFill(C.bg);doc.rect(0,0,W,H,'F');y=15;}}
-
-  function hdr(icon,txt,col){
-    chk(12);
-    setTxt(col,9,true);
-    doc.text(icon+" "+txt,ML,y);
-    setStroke(col,0.4);
-    doc.line(ML,y+1.5,ML+doc.getTextWidth(icon+" "+txt),y+1.5);
-    y+=7;
+  // clean string: remove all non-latin chars that jsPDF can't handle
+  function cl(s){
+    if(!s)return"";
+    return s.replace(/[^ -ÿ]/g,"").replace(/–/g,"-").replace(/—/g,"-")
+            .replace(/“|”/g,'"').replace(/‘|’/g,"'")
+            .replace(/ä/g,"ae").replace(/ö/g,"oe").replace(/ü/g,"ue")
+            .replace(/Ä/g,"Ae").replace(/Ö/g,"Oe").replace(/Ü/g,"Ue")
+            .replace(/ß/g,"ss");
   }
 
-  function para(txt,col=C.text2,sz=9,bold=false){
-    setTxt(col,sz,bold);
-    const lines=doc.splitTextToSize(txt,TW);
+  function hdr(prefix,txt,col){
+    chk(12);
+    setT(col,9.5,true);
+    const full=prefix+" "+cl(txt);
+    doc.text(full,ML,y);
+    setS(col,0.4);doc.line(ML,y+1.8,ML+doc.getTextWidth(full),y+1.8);
+    y+=8;
+  }
+
+  function para(txt,col=C.text2,sz=9){
+    setT(col,sz);
+    const lines=doc.splitTextToSize(cl(txt),TW);
     lines.forEach(l=>{chk(6);doc.text(l,ML,y);y+=5;});
     y+=1;
   }
 
-  function fillBox(txt,bg,border,tcol,pad=4){
-    const lines=doc.splitTextToSize(txt,TW-pad*2);
-    const bh=lines.length*5+pad*1.5+2;
+  function fillBox(txt,bg,border,tcol=C.text,pad=4){
+    const lines=doc.splitTextToSize(cl(txt),TW-pad*2-2);
+    const bh=lines.length*5+pad+4;
     chk(bh+3);
-    setFill(bg);setStroke(border,0.25);
-    doc.roundedRect(ML,y,TW,bh,2,2,'FD');
-    setTxt(tcol,8.5);
+    setF(bg);setS(border,0.25);doc.roundedRect(ML,y,TW,bh,2,2,"FD");
+    setT(tcol,8.5);
     lines.forEach((l,i)=>doc.text(l,ML+pad,y+pad+i*5));
     y+=bh+4;
   }
 
-  function answerField(label,content,minH=18){
-    chk(minH+10);
-    setTxt(C.text2,8,true);doc.text(label,ML,y);y+=4;
-    const lines=content?doc.splitTextToSize(content,TW-6):[];
-    const bh=Math.max(minH,lines.length*5+6);
+  function answerBox(label,content,minH=16){
+    chk(minH+12);
+    setT(C.text2,8,true);doc.text(cl(label),ML,y);y+=4;
+    const lines=content?doc.splitTextToSize(cl(content),TW-8):[];
+    const bh=Math.max(minH,lines.length*5+7);
     chk(bh+4);
-    setFill(C.surf2);setStroke(C.border,0.25);
-    doc.roundedRect(ML,y,TW,bh,2,2,'FD');
-    if(content){
-      setTxt(C.text,9);
-      lines.forEach((l,i)=>doc.text(l,ML+4,y+5+i*5));
-    }
+    setF(C.surf2);setS(C.border,0.25);doc.roundedRect(ML,y,TW,bh,2,2,"FD");
+    if(content){setT(C.text,8.5);lines.forEach((l,i)=>doc.text(l,ML+4,y+5+i*5));}
     y+=bh+5;
   }
 
-  function divider(){
-    chk(5);setStroke(C.border,0.2);
-    doc.line(ML,y,MR,y);y+=5;
-  }
+  function divider(){chk(5);setS(C.border,0.2);doc.line(ML,y,MR,y);y+=6;}
 
-  // ════ PAGE BACKGROUND ════
-  setFill(C.bg);doc.rect(0,0,W,H,'F');
-
-  // ════ HEADER ════
-  setFill(C.surf);setStroke(C.blue,0.4);
-  doc.roundedRect(ML-2,y-3,TW+4,30,3,3,'FD');
-  setTxt(C.blue,16,true);doc.text("Das Auge",ML+2,y+6);
-  setTxt(C.text2,8.5);doc.text("Sinnesdetektiv – Biologie Klasse 5/6",ML+2,y+13);
-  setTxt(C.text2,8);
-  doc.text("Name: "+sName,ML+2,y+20);
-  doc.text("Klasse: "+sClass,ML+50,y+20);
-  doc.text("Datum: "+sDate,ML+90,y+20);
-  doc.text("Punkte: "+score,MR-20,y+20);
-  y+=36;
-
-  // ════ QUIZ 1 ════
-  hdr("❓","Fragen zum Aufbau",C.blue);
-  const q1=saved.quizAnswers[1]||[];
-  if(q1.length===0){
-    para("(Keine Antworten gespeichert)",C.text2,8.5);
-  } else {
-    q1.forEach((a,i)=>{
-      chk(20);
-      setTxt(C.text,9,true);
-      const qlines=doc.splitTextToSize((i+1)+". "+a.q,TW);
+  function renderQuizBlock(answers){
+    if(!answers||answers.length===0){para("(Keine Antworten gespeichert)",C.text2,8.5);return;}
+    answers.forEach((a,i)=>{
+      chk(22);
+      setT(C.text,9,true);
+      const qlines=doc.splitTextToSize((i+1)+". "+cl(a.q),TW);
       qlines.forEach(l=>{chk(6);doc.text(l,ML,y);y+=5;});
       const isRight=a.wasRight;
-      setFill(isRight?[20,50,25]:[50,20,20]);
-      setStroke(isRight?C.green:C.red,0.2);
-      const alines=doc.splitTextToSize((isRight?"✓ ":"✗ ")+"Deine Antwort: "+a.chosen,TW-6);
-      const bh=alines.length*5+5;
-      doc.roundedRect(ML,y,TW,bh,2,2,'FD');
-      setTxt(isRight?C.green:C.red,8.5);
-      alines.forEach((l,j)=>doc.text(l,ML+3,y+4+j*5));
-      y+=bh+2;
+      // answer box
+      const atxt=(isRight?"[Richtig] ":"[Falsch] ")+"Deine Antwort: "+cl(a.chosen);
+      const alines=doc.splitTextToSize(atxt,TW-8);
+      const abh=alines.length*5+6;
+      chk(abh+3);
+      setF(isRight?[18,48,22]:[48,18,18]);setS(isRight?C.green:C.red,0.2);
+      doc.roundedRect(ML,y,TW,abh,2,2,"FD");
+      setT(isRight?C.green:C.red,8.5);
+      alines.forEach((l,j)=>doc.text(l,ML+4,y+5+j*5));
+      y+=abh+2;
       if(!isRight){
-        const clines=doc.splitTextToSize("Richtige Antwort: "+a.correct,TW-6);
-        const ch=clines.length*5+5;
-        chk(ch+3);
-        setFill([20,50,25]);setStroke(C.green,0.2);
-        doc.roundedRect(ML,y,TW,ch,2,2,'FD');
-        setTxt(C.green,8.5);
-        clines.forEach((l,j)=>doc.text(l,ML+3,y+4+j*5));
-        y+=ch+2;
+        const ctxt="Richtige Antwort: "+cl(a.correct);
+        const clines=doc.splitTextToSize(ctxt,TW-8);
+        const cbh=clines.length*5+6;
+        chk(cbh+3);
+        setF([18,48,22]);setS(C.green,0.2);
+        doc.roundedRect(ML,y,TW,cbh,2,2,"FD");
+        setT(C.green,8.5);
+        clines.forEach((l,j)=>doc.text(l,ML+4,y+5+j*5));
+        y+=cbh+2;
       }
-      y+=3;
+      y+=4;
     });
   }
+
+  // === PAGE BG ===
+  setF(C.bg);doc.rect(0,0,W,H,"F");
+
+  // === HEADER ===
+  setF(C.surf);setS(C.blue,0.4);doc.roundedRect(ML-2,y-3,TW+4,32,3,3,"FD");
+  setT(C.blue,15,true);doc.text("Das Auge",ML+2,y+6);
+  setT(C.text2,8.5);doc.text("Sinnesdetektiv - Biologie Klasse 5/6",ML+2,y+13);
+  setT(C.text2,8);
+  doc.text("Name: "+cl(sName),ML+2,y+21);
+  doc.text("Klasse: "+cl(sClass),ML+55,y+21);
+  doc.text("Datum: "+cl(sDate),ML+95,y+21);
+  doc.text("Punkte: "+score,MR-5,y+21,{align:"right"});
+  y+=38;
+
+  // === QUIZ 1 ===
+  hdr("1.","Fragen zum Aufbau",C.blue);
+  renderQuizBlock(saved.quizAnswers[1]);
   divider();
 
-  // ════ QUIZ 2 ════
-  hdr("❓","Fragen zum Video",C.blue);
-  const q2=saved.quizAnswers[2]||[];
-  if(q2.length===0){
-    para("(Keine Antworten gespeichert)",C.text2,8.5);
-  } else {
-    q2.forEach((a,i)=>{
-      chk(20);
-      setTxt(C.text,9,true);
-      const qlines=doc.splitTextToSize((i+1)+". "+a.q,TW);
-      qlines.forEach(l=>{chk(6);doc.text(l,ML,y);y+=5;});
-      const isRight=a.wasRight;
-      setFill(isRight?[20,50,25]:[50,20,20]);setStroke(isRight?C.green:C.red,0.2);
-      const alines=doc.splitTextToSize((isRight?"✓ ":"✗ ")+"Deine Antwort: "+a.chosen,TW-6);
-      const bh=alines.length*5+5;chk(bh+3);
-      doc.roundedRect(ML,y,TW,bh,2,2,'FD');
-      setTxt(isRight?C.green:C.red,8.5);
-      alines.forEach((l,j)=>doc.text(l,ML+3,y+4+j*5));
-      y+=bh+2;
-      if(!isRight){
-        const clines=doc.splitTextToSize("Richtige Antwort: "+a.correct,TW-6);
-        const ch=clines.length*5+5;chk(ch+3);
-        setFill([20,50,25]);setStroke(C.green,0.2);
-        doc.roundedRect(ML,y,TW,ch,2,2,'FD');
-        setTxt(C.green,8.5);
-        clines.forEach((l,j)=>doc.text(l,ML+3,y+4+j*5));
-        y+=ch+2;
-      }
-      y+=3;
-    });
-  }
+  // === QUIZ 2 ===
+  hdr("2.","Fragen zum Video",C.blue);
+  renderQuizBlock(saved.quizAnswers[2]);
   divider();
 
-  // ════ EXPERIMENT ════
-  hdr("🔬","Experiment: Der blinde Fleck",C.orange);
+  // === EXPERIMENT ===
+  hdr("3.","Experiment: Der blinde Fleck",C.orange);
 
-  hdr("🔍","Fragestellung",C.blue);
-  fillBox("Hat unser Auge eine Stelle, an der es nichts sieht – obwohl das Auge offen ist?",C.surf2,C.blue,C.text,4);
+  hdr("3a.","Fragestellung",C.blue);
+  fillBox("Hat unser Auge eine Stelle, an der es nichts sieht - obwohl das Auge offen ist?",C.surf2,C.blue);
 
-  hdr("💭","Hypothese",C.purple);
-  const hypTxt=saved.hypChoice==='b'?"Der Punkt könnte verschwinden.":"Ich werde alles sehen.";
-  fillBox(hypTxt+(saved.hyp?" – "+saved.hyp:""),C.surf2,C.purple,C.text,4);
+  hdr("3b.","Hypothese",C.purple);
+  const hypTxt=saved.hypChoice==="b"?"Der Punkt koennte verschwinden.":"Ich werde alles sehen.";
+  fillBox(hypTxt+(saved.hyp?" - "+saved.hyp:""),C.surf2,C.purple);
 
-  hdr("🧰","Material & Versuchsaufbau",C.orange);
+  hdr("3c.","Material und Versuchsaufbau",C.orange);
   para("- Ein Blatt Papier   - Ein Stift",C.text2,9);
-  fillBox("Zeichne: Links ein grosses + und rechts einen grossen Punkt, Abstand ca. 15 cm",C.surf2,C.orange,C.orange,4);
+  fillBox("Zeichne: Links ein grosses + (Kreuz) und rechts einen grossen Punkt, Abstand ca. 15 cm.",C.surf2,C.orange,C.orange);
 
-  hdr("⚗️","Durchführung",C.orange);
-  const expSteps=["Blatt in Armabstand halten","Rechtes Auge schliessen","Mit linkem Auge fest auf das + schauen","Blatt langsam auf sich zuziehen","Beobachten was mit dem Punkt passiert"];
+  hdr("3d.","Durchfuehrung",C.orange);
+  const expSteps=[
+    "Blatt in Armabstand halten.",
+    "Rechtes Auge schliessen.",
+    "Mit linkem Auge fest auf das + schauen - nicht abschauen!",
+    "Blatt langsam auf sich zuziehen.",
+    "Beobachten, was mit dem Punkt passiert.",
+  ];
   expSteps.forEach((s,i)=>{
     chk(9);
-    setFill(C.surf2);setStroke(C.border,0.2);
-    doc.roundedRect(ML,y,TW,7,1.5,1.5,'FD');
-    setTxt(C.orange,8.5,true);doc.text(""+(i+1),ML+3,y+5);
-    setTxt(C.text2,8.5,false);doc.text(s,ML+11,y+5);
+    setF(C.surf2);setS(C.border,0.2);doc.roundedRect(ML,y,TW,7.5,1.5,1.5,"FD");
+    setT(C.orange,8.5,true);doc.text(""+(i+1),ML+3,y+5.2);
+    setT(C.text2,8.5,false);doc.text(cl(s),ML+11,y+5.2);
     y+=9;
   });
   y+=2;
 
-  hdr("👁️","Beobachtung",C.blue);
-  answerField("Was habe ich beobachtet?",saved.beob||"",20);
+  hdr("3e.","Beobachtung",C.blue);
+  answerBox("Was habe ich beobachtet?",saved.beob||"",20);
 
-  hdr("💡","Erklärung",C.green);
-  fillBox("An der Stelle, wo der Sehnerv das Auge verlasst, kann das Auge nichts sehen. Das Gehirn fullt diese Lucke automatisch auf, sodass wir sie im Alltag nie bemerken.",C.surf2,C.green,C.text,4);
+  hdr("3f.","Erklaerung",C.green);
+  fillBox("An der Stelle, wo der Sehnerv das Auge verlaesst, kann das Auge nichts sehen. Das Gehirn fuellt diese Luecke automatisch auf, sodass wir sie im Alltag nie bemerken.",C.surf2,C.green);
 
-  hdr("🔎","Fragen zur Erklärung",C.blue);
-  const q3=saved.quizAnswers[3]||[];
-  if(q3.length===0){
-    para("(Keine Antworten gespeichert)",C.text2,8.5);
-  } else {
-    q3.forEach((a,i)=>{
-      chk(20);
-      setTxt(C.text,9,true);
-      const qlines=doc.splitTextToSize((i+1)+". "+a.q,TW);
-      qlines.forEach(l=>{chk(6);doc.text(l,ML,y);y+=5;});
-      const isRight=a.wasRight;
-      setFill(isRight?[20,50,25]:[50,20,20]);setStroke(isRight?C.green:C.red,0.2);
-      const alines=doc.splitTextToSize((isRight?"✓ ":"✗ ")+"Deine Antwort: "+a.chosen,TW-6);
-      const bh=alines.length*5+5;chk(bh+3);
-      doc.roundedRect(ML,y,TW,bh,2,2,'FD');
-      setTxt(isRight?C.green:C.red,8.5);
-      alines.forEach((l,j)=>doc.text(l,ML+3,y+4+j*5));
-      y+=bh+4;
-    });
-  }
+  hdr("3g.","Fragen zur Erklaerung",C.blue);
+  renderQuizBlock(saved.quizAnswers[3]);
 
-  hdr("✍️","Fazit",C.purple);
-  answerField("Zusammenfassung in eigenen Worten:",saved.fazit||"",18);
+  hdr("3h.","Fazit",C.purple);
+  answerBox("Zusammenfassung in eigenen Worten:",saved.fazit||"",18);
   divider();
 
-  // ════ REFLEXION ════
-  hdr("✅","Reflexion",C.green);
-  const rLabels={verstanden:"Aufbau verstanden",spass:"Experiment machte Spass",schwierig:"Aufgaben gut zu schaffen"};
-  Object.entries(rLabels).forEach(([k,lbl])=>{
+  // === REFLEXION ===
+  hdr("4.","Reflexion",C.green);
+  const rL={verstanden:"Aufbau des Auges verstanden",spass:"Experiment hat Spass gemacht",schwierig:"Aufgaben gut zu schaffen"};
+  Object.entries(rL).forEach(([k,lbl])=>{
     chk(9);
+    setT(C.text2,8.5);doc.text(cl(lbl)+":",ML,y);
     const val=saved.reflect[k]||0;
-    setTxt(C.text2,8.5,false);doc.text(lbl+":",ML,y);
-    // draw stars manually
     for(let i=0;i<5;i++){
-      const filled=i<val;
-      setTxt(filled?C.orange:C.text2,11,false);
-      doc.text(filled?"★":"☆",MR-28+i*6,y);
+      setT(i<val?C.orange:C.border,11,false);
+      doc.text(i<val?"*":"o",MR-30+i*7,y);
     }
     y+=7;
   });
-  if(saved.reflectComment){
-    y+=2;answerField("Kommentar:",saved.reflectComment,12);
-  }
+  if(saved.reflectComment){y+=2;answerBox("Kommentar:",saved.reflectComment,12);}
 
-  // ════ FOOTER (all pages) ════
-  const total=doc.getNumberOfPages();
-  for(let p=1;p<=total;p++){
+  // === FOOTER all pages ===
+  const np=doc.getNumberOfPages();
+  for(let p=1;p<=np;p++){
     doc.setPage(p);
-    setFill(C.bg);doc.rect(0,H-10,W,10,'F');
-    setTxt(C.border,7.5);
-    doc.text("Sinnesdetektiv – Biologie Klasse 5/6  |  mindcraft-fes",ML,H-4);
-    doc.text("Seite "+p+" / "+total,MR,H-4,{align:"right"});
+    setF(C.bg);doc.rect(0,H-10,W,10,"F");
+    setT(C.border,7.5);
+    doc.text("Sinnesdetektiv - Biologie Klasse 5/6 | mindcraft-fes",ML,H-4);
+    doc.text("Seite "+p+" / "+np,MR,H-4,{align:"right"});
   }
 
-  doc.save("Sinnesdetektiv_Auge_"+sName.replace(/\s+/g,"_")+"_"+sClass+".pdf");
+  doc.save("Sinnesdetektiv_Auge_"+cl(sName).replace(/\s+/g,"_")+"_"+cl(sClass)+".pdf");
 }
 </script>
 </body>
