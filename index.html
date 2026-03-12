@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sinnesdetektiv – Das Auge</title>
+<title>Sinnesdetektiv - Das Auge</title>
 <link rel="manifest" href="manifest.json">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -11,977 +11,700 @@
 <meta name="apple-mobile-web-app-title" content="Sinnesdetektiv">
 <link rel="apple-touch-icon" href="SinnesLogo.png">
 <meta name="theme-color" content="#0d1117">
-<meta property="og:title" content="Sinnesdetektiv – Das Auge">
-<meta property="og:description" content="Entdecke Aufbau und Funktion des Auges">
-<meta property="og:type" content="website">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
-:root{
-  --bg:#0d1117;--surface:#161b22;--surface2:#1e2530;
-  --border:#30363d;--accent:#58a6ff;--accent2:#3fb950;
-  --accent3:#f78166;--accent4:#d2a8ff;--accent5:#ffa657;
-  --text:#e6edf3;--text2:#8b949e;--radius:16px;
-}
+:root{--bg:#0d1117;--s:#161b22;--s2:#1e2530;--bd:#30363d;--a:#58a6ff;--a2:#3fb950;--a3:#f78166;--a4:#d2a8ff;--a5:#ffa657;--t:#e6edf3;--t2:#8b949e;--r:16px;}
 *{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
-
-/* FULLSCREEN */
-#imgOverlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.93);z-index:9999;cursor:zoom-out;align-items:center;justify-content:center;}
-#imgOverlay.show{display:flex;}
-#imgOverlay img{max-width:95vw;max-height:95vh;border-radius:10px;}
-#imgOverlay .close-x{position:absolute;top:1rem;right:1.5rem;color:#8b949e;font-size:1rem;pointer-events:none;}
-
-/* START */
-#startScreen{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem;background:radial-gradient(ellipse at 30% 20%,#1a2744,#0d1117);text-align:center;}
-.logo-circle{width:100px;height:100px;border-radius:50%;background:linear-gradient(135deg,#1e3a5f,#2d5a8e);border:3px solid var(--accent);display:flex;align-items:center;justify-content:center;font-size:2.8rem;margin-bottom:1.25rem;box-shadow:0 0 40px rgba(88,166,255,.3);animation:pulse 3s ease-in-out infinite;}
+body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--t);min-height:100vh;}
+#ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.93);z-index:9999;cursor:zoom-out;align-items:center;justify-content:center;}
+#ov.show{display:flex;}
+#ov img{max-width:95vw;max-height:95vh;border-radius:10px;}
+#ov span{position:absolute;top:1rem;right:1.5rem;color:#8b949e;font-size:1rem;pointer-events:none;}
+#S{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem;background:radial-gradient(ellipse at 30% 20%,#1a2744,#0d1117);text-align:center;}
+.lc{width:100px;height:100px;border-radius:50%;background:linear-gradient(135deg,#1e3a5f,#2d5a8e);border:3px solid var(--a);display:flex;align-items:center;justify-content:center;font-size:2.8rem;margin-bottom:1.25rem;box-shadow:0 0 40px rgba(88,166,255,.3);animation:pulse 3s ease-in-out infinite;}
 @keyframes pulse{0%,100%{box-shadow:0 0 35px rgba(88,166,255,.3)}50%{box-shadow:0 0 55px rgba(88,166,255,.5)}}
-#startScreen h1{font-family:'Outfit',sans-serif;font-size:clamp(1.8rem,5vw,3rem);font-weight:800;background:linear-gradient(135deg,#58a6ff,#d2a8ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:.4rem;}
-#startScreen>p{color:var(--text2);margin-bottom:1.75rem;max-width:360px;line-height:1.6;}
-.name-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.6rem;width:100%;max-width:400px;margin-bottom:1.25rem;}
-.name-box label{display:block;font-weight:700;margin-bottom:.5rem;color:var(--accent);font-size:.9rem;}
-.name-box input{width:100%;padding:.75rem 1rem;border-radius:10px;border:2px solid var(--border);background:var(--surface2);color:var(--text);font-family:'Nunito',sans-serif;font-size:.95rem;outline:none;transition:border-color .2s;}
-.name-box input:focus{border-color:var(--accent);}
-.class-row{display:flex;gap:.6rem;margin-top:.6rem;}
-.class-row input{flex:1;}
-.btn-primary{background:linear-gradient(135deg,#1f6feb,#388bfd);color:white;border:none;border-radius:12px;padding:.8rem 2.5rem;font-family:'Nunito',sans-serif;font-size:1rem;font-weight:800;cursor:pointer;transition:all .2s;box-shadow:0 4px 20px rgba(31,111,235,.4);}
-.btn-primary:hover{transform:translateY(-2px);}
-.btn-primary:disabled{opacity:.4;cursor:not-allowed;transform:none;}
-.btn-primary.dimmed{opacity:.4;cursor:default;box-shadow:none;}
-
-/* CONTENT */
-#contentScreen{display:none;min-height:100vh;padding:1.25rem 1rem 5rem;max-width:700px;margin:0 auto;}
-.top-bar{display:flex;align-items:center;gap:.75rem;margin-bottom:1.25rem;flex-wrap:wrap;}
-.mod-tag{background:rgba(88,166,255,.1);border:1px solid rgba(88,166,255,.25);border-radius:20px;padding:.25rem .75rem;font-size:.78rem;color:var(--accent);font-weight:700;}
-.prog-wrap{flex:1;background:var(--surface);border-radius:10px;height:7px;overflow:hidden;min-width:80px;}
-.prog-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent4));border-radius:10px;transition:width .4s;}
-.prog-lbl{font-size:.78rem;color:var(--text2);}
-
-/* CARDS */
-.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.6rem;margin-bottom:.85rem;animation:fadeUp .28s ease;}
-@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
-.badge{display:inline-flex;align-items:center;gap:.3rem;background:var(--surface2);border-radius:20px;padding:.22rem .8rem;font-size:.76rem;font-weight:700;color:var(--accent);margin-bottom:.9rem;text-transform:uppercase;letter-spacing:.04em;}
+#S h1{font-family:'Outfit',sans-serif;font-size:clamp(1.8rem,5vw,3rem);font-weight:800;background:linear-gradient(135deg,#58a6ff,#d2a8ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:.4rem;}
+#S>p{color:var(--t2);margin-bottom:1.75rem;max-width:360px;line-height:1.6;}
+.nb{background:var(--s);border:1px solid var(--bd);border-radius:var(--r);padding:1.6rem;width:100%;max-width:400px;margin-bottom:1.25rem;}
+.nb label{display:block;font-weight:700;margin-bottom:.5rem;color:var(--a);font-size:.9rem;}
+.nb input{width:100%;padding:.75rem 1rem;border-radius:10px;border:2px solid var(--bd);background:var(--s2);color:var(--t);font-family:'Nunito',sans-serif;font-size:.95rem;outline:none;transition:border-color .2s;}
+.nb input:focus{border-color:var(--a);}
+.cr{display:flex;gap:.6rem;margin-top:.6rem;}
+.cr input{flex:1;}
+.bp{background:linear-gradient(135deg,#1f6feb,#388bfd);color:white;border:none;border-radius:12px;padding:.8rem 2.5rem;font-family:'Nunito',sans-serif;font-size:1rem;font-weight:800;cursor:pointer;transition:all .2s;box-shadow:0 4px 20px rgba(31,111,235,.4);}
+.bp:hover{transform:translateY(-2px);}
+#C{display:none;min-height:100vh;padding:1.25rem 1rem 5rem;max-width:700px;margin:0 auto;}
+.tb{display:flex;align-items:center;gap:.75rem;margin-bottom:1.25rem;flex-wrap:wrap;}
+.mt{background:rgba(88,166,255,.1);border:1px solid rgba(88,166,255,.25);border-radius:20px;padding:.25rem .75rem;font-size:.78rem;color:var(--a);font-weight:700;}
+.pw{flex:1;background:var(--s);border-radius:10px;height:7px;overflow:hidden;min-width:80px;}
+.pf{height:100%;background:linear-gradient(90deg,var(--a),var(--a4));border-radius:10px;transition:width .4s;}
+.pl{font-size:.78rem;color:var(--t2);}
+.card{background:var(--s);border:1px solid var(--bd);border-radius:var(--r);padding:1.6rem;margin-bottom:.85rem;animation:fu .28s ease;}
+@keyframes fu{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.bg{display:inline-flex;align-items:center;gap:.3rem;background:var(--s2);border-radius:20px;padding:.22rem .8rem;font-size:.76rem;font-weight:700;color:var(--a);margin-bottom:.9rem;text-transform:uppercase;letter-spacing:.04em;}
 .card h3{font-family:'Outfit',sans-serif;font-weight:700;font-size:1.15rem;margin-bottom:.9rem;}
-.card p,.card li{line-height:1.8;color:var(--text2);margin-bottom:.35rem;}
-.card strong{color:var(--text);}
+.card p,.card li{line-height:1.8;color:var(--t2);margin-bottom:.35rem;}
+.card strong{color:var(--t);}
 .card ul,.card ol{padding-left:1.15rem;margin:.4rem 0;}
-.info-box{background:rgba(88,166,255,.07);border-left:3px solid var(--accent);border-radius:0 8px 8px 0;padding:.65rem .9rem;margin:.65rem 0;color:var(--text2);font-size:.91rem;}
-.warn-box{background:rgba(255,166,87,.07);border-left:3px solid var(--accent5);border-radius:0 8px 8px 0;padding:.65rem .9rem;margin:.65rem 0;color:var(--text2);font-size:.91rem;}
-.success-box{background:rgba(63,185,80,.07);border-left:3px solid var(--accent2);border-radius:0 8px 8px 0;padding:.65rem .9rem;margin:.65rem 0;color:var(--text2);font-size:.91rem;}
-
-/* IMG */
-.img-wrap{margin:1.1rem 0;text-align:center;}
-.img-wrap img{max-width:100%;border-radius:10px;cursor:zoom-in;border:1px solid var(--border);transition:transform .2s,box-shadow .2s;}
-.img-wrap img:hover{transform:scale(1.01);box-shadow:0 4px 20px rgba(88,166,255,.18);}
-.img-hint{font-size:.75rem;color:var(--text2);margin-top:.35rem;}
-
-/* VIDEO */
-.vid-wrap{position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:10px;margin:1rem 0;border:1px solid var(--border);}
-.vid-wrap iframe{position:absolute;top:0;left:0;width:100%;height:100%;}
-
-/* ZUORDNUNG */
-.term-pool-lbl{font-size:.76rem;color:var(--text2);margin-bottom:.4rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;}
-.term-pool{display:flex;flex-wrap:wrap;gap:.4rem;padding:.85rem;background:var(--surface2);border-radius:10px;border:1px solid var(--border);min-height:46px;margin-bottom:.85rem;}
-.chip{background:var(--surface);border:1.5px solid var(--accent);border-radius:20px;padding:.32rem .8rem;font-size:.85rem;cursor:pointer;transition:all .18s;color:var(--accent);user-select:none;}
-.chip:hover{background:rgba(88,166,255,.1);}
-.chip.sel{background:rgba(88,166,255,.18);box-shadow:0 0 0 2px var(--accent);}
-.chip.used{opacity:.22;cursor:not-allowed;pointer-events:none;}
-.slot{display:flex;align-items:center;gap:.65rem;background:var(--surface2);border-radius:8px;padding:.55rem .8rem;border:2px dashed var(--border);cursor:pointer;transition:all .18s;font-size:.88rem;margin-bottom:.4rem;}
-.slot:hover{border-color:var(--accent);}
-.slot.ok{border-color:var(--accent2);background:rgba(63,185,80,.07);border-style:solid;}
-.slot.bad{border-color:var(--accent3);background:rgba(247,129,102,.07);border-style:solid;}
-.slot-n{font-size:.75rem;font-weight:700;color:var(--text2);min-width:16px;}
-.slot-lbl{flex:1;color:var(--text2);font-size:.82rem;}
-.slot-val{font-weight:700;font-size:.87rem;}
-
-/* QUIZ */
-.q-txt{font-weight:700;font-size:.98rem;margin-bottom:.8rem;line-height:1.5;}
-.opts{display:flex;flex-direction:column;gap:.45rem;}
-.opt{background:var(--surface2);border:2px solid var(--border);border-radius:10px;padding:.75rem 1rem;text-align:left;color:var(--text);font-family:'Nunito',sans-serif;font-size:.91rem;cursor:pointer;transition:all .15s;line-height:1.45;width:100%;}
-.opt:hover:not(:disabled){border-color:var(--accent);background:rgba(88,166,255,.06);}
-/* Correct answer expands */
-.opt.correct{border-color:var(--accent2);background:rgba(63,185,80,.09);color:var(--accent2);padding:.85rem 1rem 1rem;}
-.opt.correct .opt-explain{display:block;margin-top:.5rem;font-size:.84rem;color:var(--text2);font-weight:400;border-top:1px solid rgba(63,185,80,.2);padding-top:.5rem;line-height:1.6;}
-.opt.wrong{border-color:var(--accent3);background:rgba(247,129,102,.09);color:var(--accent3);}
-.opt-explain{display:none;}
-.fb{margin-top:.55rem;padding:.6rem .85rem;border-radius:8px;font-weight:600;font-size:.88rem;display:none;}
-.fb.show{display:block;}
-.fb.correct{background:rgba(63,185,80,.08);color:var(--accent2);border:1px solid var(--accent2);}
-.fb.wrong{background:rgba(247,129,102,.08);color:var(--accent3);border:1px solid var(--accent3);}
-
-/* RADIO HYPOTHESE */
-.radio-opts{display:flex;flex-direction:column;gap:.55rem;margin:.85rem 0;}
-.radio-opt{display:flex;align-items:flex-start;gap:.75rem;background:var(--surface2);border:2px solid var(--border);border-radius:10px;padding:.85rem 1rem;cursor:pointer;transition:all .18s;}
-.radio-opt:hover{border-color:var(--accent);}
-.radio-opt.chosen{border-color:var(--accent);background:rgba(88,166,255,.08);}
-.radio-opt input{width:18px;height:18px;accent-color:var(--accent);cursor:pointer;flex-shrink:0;margin-top:1px;}
-.radio-opt span{color:var(--text2);font-size:.92rem;line-height:1.5;}
-
-/* CHECKLIST */
-.checklist{display:flex;flex-direction:column;gap:.45rem;margin:.5rem 0;}
-.chk-item{display:flex;align-items:flex-start;gap:.7rem;padding:.65rem .8rem;background:var(--surface2);border-radius:8px;border:1px solid var(--border);cursor:pointer;transition:all .18s;}
-.chk-item.done{background:rgba(63,185,80,.05);border-color:rgba(63,185,80,.25);}
-.chk-item input[type=checkbox]{width:17px;height:17px;accent-color:var(--accent2);cursor:pointer;flex-shrink:0;margin-top:2px;}
-.chk-item .step-txt{color:var(--text2);font-size:.9rem;line-height:1.55;}
-.chk-item.done .step-txt{opacity:.6;}
-
-/* HELPER WORDS */
-.helpers{display:flex;flex-wrap:wrap;gap:.35rem;margin:.45rem 0 .65rem;}
-.hw{background:rgba(210,168,255,.07);border:1px solid rgba(210,168,255,.22);border-radius:6px;padding:.22rem .6rem;font-size:.8rem;color:var(--accent4);cursor:pointer;transition:all .18s;}
-.hw:hover{background:rgba(210,168,255,.14);}
-
-/* FIELD */
-.field label{display:block;font-size:.83rem;font-weight:700;color:var(--text2);margin-bottom:.35rem;}
-.field textarea{width:100%;padding:.7rem .9rem;border-radius:10px;border:2px solid var(--border);background:var(--surface2);color:var(--text);font-family:'Nunito',sans-serif;font-size:.91rem;resize:vertical;min-height:78px;outline:none;transition:border-color .2s;line-height:1.6;}
-.field textarea:focus{border-color:var(--accent);}
-.field .hint{font-size:.76rem;color:var(--text2);margin-top:.22rem;font-style:italic;}
-.field{margin:.5rem 0;}
-
-/* HYP DISPLAY */
-.hyp-card{background:rgba(210,168,255,.06);border:1px solid rgba(210,168,255,.18);border-radius:10px;padding:.9rem 1rem;margin:.65rem 0;}
-.hyp-card .hyp-lbl{font-size:.76rem;font-weight:700;color:var(--accent4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:.3rem;}
-.hyp-card .hyp-txt{color:var(--text2);font-style:italic;line-height:1.6;}
-
-/* BUTTONS */
-.btn-save{background:linear-gradient(135deg,#1f6feb,#388bfd);color:white;border:none;border-radius:10px;padding:.62rem 1.45rem;font-family:'Nunito',sans-serif;font-size:.91rem;font-weight:700;cursor:pointer;transition:all .2s;}
-.btn-save:hover{transform:translateY(-1px);}
-.btn-next{background:linear-gradient(135deg,#238636,#2ea043);color:white;border:none;border-radius:10px;padding:.72rem 1.7rem;font-family:'Nunito',sans-serif;font-size:.97rem;font-weight:700;cursor:pointer;transition:all .2s;}
-.btn-next:hover{transform:translateY(-1px);}
-.btn-pdf{background:linear-gradient(135deg,#6e40c9,#8957e5);color:white;border:none;border-radius:10px;padding:.72rem 1.7rem;font-family:'Nunito',sans-serif;font-size:.97rem;font-weight:700;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:.45rem;}
-.btn-pdf:hover{transform:translateY(-1px);}
-.nav-row{display:flex;gap:.65rem;margin-top:1.1rem;flex-wrap:wrap;align-items:center;}
-
-/* PHASE TITLE */
-.phase-t{font-weight:800;font-size:.8rem;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.55rem;display:flex;align-items:center;gap:.35rem;}
-
-/* COMPLETION */
-.done-card{background:linear-gradient(135deg,var(--surface),var(--surface2));border:1px solid var(--accent2);border-radius:var(--radius);padding:2.25rem;text-align:center;}
-.done-card .big{font-size:3.5rem;margin-bottom:.85rem;}
-.done-card h2{font-family:'Outfit',sans-serif;font-size:1.65rem;font-weight:800;margin-bottom:.4rem;}
-.score-n{font-size:2.8rem;font-weight:900;font-family:'Outfit',sans-serif;color:var(--accent2);line-height:1;}
-
-/* STARS */
-.star-row{display:flex;gap:.25rem;}
-.star{font-size:1.3rem;cursor:pointer;filter:grayscale(1) opacity(.35);transition:transform .1s,filter .1s;}
-.star.on{filter:none;}
-.star:hover{transform:scale(1.2);}
-.reflect-grid{display:flex;flex-direction:column;gap:.6rem;margin:.6rem 0;}
-.reflect-row{display:flex;align-items:center;gap:.65rem;flex-wrap:wrap;}
-.reflect-row label{flex:1;min-width:170px;color:var(--text2);font-size:.9rem;}
+.ib{background:rgba(88,166,255,.07);border-left:3px solid var(--a);border-radius:0 8px 8px 0;padding:.65rem .9rem;margin:.65rem 0;color:var(--t2);font-size:.91rem;}
+.wb{background:rgba(255,166,87,.07);border-left:3px solid var(--a5);border-radius:0 8px 8px 0;padding:.65rem .9rem;margin:.65rem 0;color:var(--t2);font-size:.91rem;}
+.sb{background:rgba(63,185,80,.07);border-left:3px solid var(--a2);border-radius:0 8px 8px 0;padding:.65rem .9rem;margin:.65rem 0;color:var(--t2);font-size:.91rem;}
+.iw{margin:1.1rem 0;text-align:center;}
+.iw img{max-width:100%;border-radius:10px;cursor:zoom-in;border:1px solid var(--bd);}
+.ih{font-size:.75rem;color:var(--t2);margin-top:.35rem;}
+.vw{position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:10px;margin:1rem 0;border:1px solid var(--bd);}
+.vw iframe{position:absolute;top:0;left:0;width:100%;height:100%;}
+.tpl{font-size:.76rem;color:var(--t2);margin-bottom:.4rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;}
+.tp{display:flex;flex-wrap:wrap;gap:.4rem;padding:.85rem;background:var(--s2);border-radius:10px;border:1px solid var(--bd);min-height:46px;margin-bottom:.85rem;}
+.ch{background:var(--s);border:1.5px solid var(--a);border-radius:20px;padding:.32rem .8rem;font-size:.85rem;cursor:pointer;color:var(--a);user-select:none;}
+.ch:hover{background:rgba(88,166,255,.1);}
+.ch.sel{background:rgba(88,166,255,.18);box-shadow:0 0 0 2px var(--a);}
+.ch.used{opacity:.22;cursor:not-allowed;pointer-events:none;}
+.sl{display:flex;align-items:center;gap:.65rem;background:var(--s2);border-radius:8px;padding:.55rem .8rem;border:2px dashed var(--bd);cursor:pointer;font-size:.88rem;margin-bottom:.4rem;}
+.sl:hover{border-color:var(--a);}
+.sl.ok{border-color:var(--a2);background:rgba(63,185,80,.07);border-style:solid;}
+.sl.bad{border-color:var(--a3);background:rgba(247,129,102,.07);border-style:solid;}
+.sn{font-size:.75rem;font-weight:700;color:var(--t2);min-width:16px;}
+.sl2{flex:1;color:var(--t2);font-size:.82rem;}
+.sv{font-weight:700;font-size:.87rem;}
+.qt{font-weight:700;font-size:.98rem;margin-bottom:.8rem;line-height:1.5;}
+.os{display:flex;flex-direction:column;gap:.45rem;}
+.op{background:var(--s2);border:2px solid var(--bd);border-radius:10px;padding:.75rem 1rem;text-align:left;color:var(--t);font-family:'Nunito',sans-serif;font-size:.91rem;cursor:pointer;line-height:1.45;width:100%;}
+.op:hover:not(:disabled){border-color:var(--a);background:rgba(88,166,255,.06);}
+.op.correct{border-color:var(--a2);background:rgba(63,185,80,.09);color:var(--a2);padding:.85rem 1rem 1rem;}
+.op.correct .oe{display:block;margin-top:.5rem;font-size:.84rem;color:var(--t2);font-weight:400;border-top:1px solid rgba(63,185,80,.2);padding-top:.5rem;line-height:1.6;}
+.op.wrong{border-color:var(--a3);background:rgba(247,129,102,.09);color:var(--a3);}
+.oe{display:none;}
+.ro{display:flex;flex-direction:column;gap:.55rem;margin:.85rem 0;}
+.rop{display:flex;align-items:flex-start;gap:.75rem;background:var(--s2);border:2px solid var(--bd);border-radius:10px;padding:.85rem 1rem;cursor:pointer;}
+.rop:hover{border-color:var(--a);}
+.rop.chosen{border-color:var(--a);background:rgba(88,166,255,.08);}
+.rop input{width:18px;height:18px;accent-color:var(--a);cursor:pointer;flex-shrink:0;margin-top:1px;}
+.rop span{color:var(--t2);font-size:.92rem;line-height:1.5;}
+.cl{display:flex;flex-direction:column;gap:.45rem;margin:.5rem 0;}
+.ci{display:flex;align-items:flex-start;gap:.7rem;padding:.65rem .8rem;background:var(--s2);border-radius:8px;border:1px solid var(--bd);cursor:pointer;}
+.ci.done{background:rgba(63,185,80,.05);border-color:rgba(63,185,80,.25);}
+.ci input[type=checkbox]{width:17px;height:17px;accent-color:var(--a2);cursor:pointer;flex-shrink:0;margin-top:2px;}
+.ci .st{color:var(--t2);font-size:.9rem;line-height:1.55;}
+.ci.done .st{opacity:.6;}
+.hw{display:flex;flex-wrap:wrap;gap:.35rem;margin:.45rem 0 .65rem;}
+.hwb{background:rgba(210,168,255,.07);border:1px solid rgba(210,168,255,.22);border-radius:6px;padding:.22rem .6rem;font-size:.8rem;color:var(--a4);cursor:pointer;}
+.hwb:hover{background:rgba(210,168,255,.14);}
+.fl label{display:block;font-size:.83rem;font-weight:700;color:var(--t2);margin-bottom:.35rem;}
+.fl textarea{width:100%;padding:.7rem .9rem;border-radius:10px;border:2px solid var(--bd);background:var(--s2);color:var(--t);font-family:'Nunito',sans-serif;font-size:.91rem;resize:vertical;min-height:78px;outline:none;transition:border-color .2s;line-height:1.6;}
+.fl textarea:focus{border-color:var(--a);}
+.fl .hint{font-size:.76rem;color:var(--t2);margin-top:.22rem;font-style:italic;}
+.fl{margin:.5rem 0;}
+.hc{background:rgba(210,168,255,.06);border:1px solid rgba(210,168,255,.18);border-radius:10px;padding:.9rem 1rem;margin:.65rem 0;}
+.hc .hl{font-size:.76rem;font-weight:700;color:var(--a4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:.3rem;}
+.hc .ht{color:var(--t2);font-style:italic;line-height:1.6;}
+.bs{background:linear-gradient(135deg,#1f6feb,#388bfd);color:white;border:none;border-radius:10px;padding:.62rem 1.45rem;font-family:'Nunito',sans-serif;font-size:.91rem;font-weight:700;cursor:pointer;}
+.bn{background:linear-gradient(135deg,#238636,#2ea043);color:white;border:none;border-radius:10px;padding:.72rem 1.7rem;font-family:'Nunito',sans-serif;font-size:.97rem;font-weight:700;cursor:pointer;}
+.bpdf{background:linear-gradient(135deg,#6e40c9,#8957e5);color:white;border:none;border-radius:10px;padding:.72rem 1.7rem;font-family:'Nunito',sans-serif;font-size:.97rem;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:.45rem;}
+.nr{display:flex;gap:.65rem;margin-top:1.1rem;flex-wrap:wrap;align-items:center;}
+.pt{font-weight:800;font-size:.8rem;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.55rem;}
+.dc{background:linear-gradient(135deg,var(--s),var(--s2));border:1px solid var(--a2);border-radius:var(--r);padding:2.25rem;text-align:center;}
+.dc h2{font-family:'Outfit',sans-serif;font-size:1.65rem;font-weight:800;margin-bottom:.4rem;}
+.sco{font-size:2.8rem;font-weight:900;font-family:'Outfit',sans-serif;color:var(--a2);line-height:1;}
+.sr{display:flex;gap:.25rem;}
+.str{font-size:1.3rem;cursor:pointer;filter:grayscale(1) opacity(.35);}
+.str.on{filter:none;}
+.rg{display:flex;flex-direction:column;gap:.6rem;margin:.6rem 0;}
+.rr{display:flex;align-items:center;gap:.65rem;flex-wrap:wrap;}
+.rr label{flex:1;min-width:170px;color:var(--t2);font-size:.9rem;}
+.pt2{color:var(--a5);}
 </style>
 </head>
 <body>
-
-<div id="imgOverlay" onclick="closeImg()">
-  <span class="close-x">✕ Tippen zum Schließen</span>
-  <img id="overlayImg" src="" alt="">
+<div id="ov" onclick="closeImg()">
+  <span>x  Tippen zum Schliessen</span>
+  <img id="oi" src="" alt="">
 </div>
 
-<!-- START -->
-<div id="startScreen">
-  <div class="logo-circle">👁️</div>
+<div id="S">
+  <div class="lc">&#128065;&#65039;</div>
   <h1>Das Auge</h1>
   <p>Entdecke Aufbau, Funktion und das Geheimnis des blinden Flecks</p>
-  <div class="name-box">
+  <div class="nb">
     <label>Dein Name</label>
-    <input type="text" id="nameIn" placeholder="Vorname Nachname" maxlength="40">
-    <div class="class-row">
-      <input type="text" id="classIn" placeholder="Klasse (z.B. 5b)" maxlength="10">
-      <input type="date" id="dateIn">
+    <input type="text" id="nIn" placeholder="Vorname Nachname" maxlength="40">
+    <div class="cr">
+      <input type="text" id="cIn" placeholder="Klasse z.B. 5b" maxlength="10">
+      <input type="date" id="dIn">
     </div>
   </div>
-  <button class="btn-primary" id="startBtn" onclick="go()">Los geht's →</button>
+  <button class="bp" id="goBtn" type="button">Los geht's</button>
 </div>
 
-<!-- CONTENT -->
-<div id="contentScreen">
-  <div class="top-bar">
-    <span class="mod-tag">👁️ Das Auge</span>
-    <div class="prog-wrap"><div class="prog-fill" id="pFill" style="width:0%"></div></div>
-    <span class="prog-lbl" id="pLbl">0/9</span>
+<div id="C">
+  <div class="tb">
+    <span class="mt">Das Auge</span>
+    <div class="pw"><div class="pf" id="pFill" style="width:0%"></div></div>
+    <span class="pl" id="pLbl">0/9</span>
   </div>
-  <div id="stepBox"></div>
+  <div id="box"></div>
 </div>
 
 <script>
-// ── state ──
-let sName="",sClass="",sDate="";
-let idx=0, score=0;
-let saved={
-  hyp:"", beob:"", fazit:"", reflectComment:"",
-  reflect:{verstanden:0,spass:0,schwierig:0},
-  quizAnswers:[],
-  hypChoice:""
-};
+var sName="", sClass="", sDate="", idx=0, score=0;
+var saved={hyp:"",beob:"",fazit:"",rc:"",ref:{v:0,s:0,c:0},qa:[],hc:""};
+var TOTAL=9;
 
-function checkBtn(){
-  const v=document.getElementById("nameIn").value.trim();
-  const btn=document.getElementById("startBtn");
-  if(v.length < 2){ btn.classList.add("dimmed"); } else { btn.classList.remove("dimmed"); }
+function init(){
+  var di=document.getElementById("dIn");
+  var t=new Date();
+  var m=t.getMonth()+1;
+  var d=t.getDate();
+  di.value=t.getFullYear()+"-"+(m<10?"0":"")+m+"-"+(d<10?"0":"")+d;
+  document.getElementById("goBtn").onclick=startApp;
 }
 
-function go(){
-  const nameVal = document.getElementById("nameIn").value.trim();
-  if(nameVal.length < 2){
-    document.getElementById("nameIn").style.borderColor="#f78166";
-    document.getElementById("nameIn").focus();
+function startApp(){
+  var v=document.getElementById("nIn").value;
+  if(!v||v.trim().length<2){
+    document.getElementById("nIn").style.borderColor="#f78166";
+    document.getElementById("nIn").focus();
     return;
   }
-  sName = nameVal;
-  sClass = document.getElementById("classIn").value.trim() || "-";
-  const d = document.getElementById("dateIn").value;
-  sDate = d ? new Date(d).toLocaleDateString("de-DE") : new Date().toLocaleDateString("de-DE");
-  document.getElementById("startScreen").style.display="none";
-  document.getElementById("contentScreen").style.display="block";
+  sName=v.trim();
+  sClass=document.getElementById("cIn").value.trim()||"-";
+  var dv=document.getElementById("dIn").value;
+  if(dv){
+    var parts=dv.split("-");
+    sDate=parts[2]+"."+parts[1]+"."+parts[0];
+  } else {
+    var t2=new Date();
+    sDate=t2.getDate()+"."+(t2.getMonth()+1)+"."+t2.getFullYear();
+  }
+  document.getElementById("S").style.display="none";
+  document.getElementById("C").style.display="block";
   render();
 }
 
-window.addEventListener("DOMContentLoaded", function(){
-  // Set today's date
-  const di = document.getElementById("dateIn");
-  const t = new Date();
-  di.value = t.getFullYear()+"-"+String(t.getMonth()+1).padStart(2,"0")+"-"+String(t.getDate()).padStart(2,"0");
+window.onload=init;
 
-  // Enable button reactively
-  const ni = document.getElementById("nameIn");
-  ["input","keyup","change","paste"].forEach(ev => ni.addEventListener(ev, checkBtn));
-  ni.addEventListener("keydown", e => { if(e.key==="Enter") go(); });
-
-  // Visual dimming via class (not disabled attribute)
-  checkBtn();
-});
-
-// ── steps ──
-const STEPS=[
-  {id:"text1",  lbl:"📖 Sachtext 1"},
-  {id:"zuord",  lbl:"🏷️ Zuordnung"},
-  {id:"quiz1",  lbl:"❓ Fragen 1"},
-  {id:"video",  lbl:"🎬 Video"},
-  {id:"quiz2",  lbl:"❓ Fragen 2"},
-  {id:"expIntro",lbl:"🔬 Experiment"},
-  {id:"expMain", lbl:"🔬 Durchführung"},
-  {id:"expExp",  lbl:"💡 Erklärung"},
-  {id:"reflect", lbl:"✅ Abschluss"},
-];
-const TOTAL=STEPS.length;
-
-function updProg(){
+function updP(){
   document.getElementById("pFill").style.width=Math.round(idx/TOTAL*100)+"%";
   document.getElementById("pLbl").textContent=idx+"/"+TOTAL;
 }
 function next(){idx++;render();window.scrollTo({top:0,behavior:'smooth'});}
 function render(){
-  updProg();
+  updP();
   if(idx>=TOTAL){renderDone();return;}
-  const c=document.getElementById("stepBox");
-  c.innerHTML="";
-  const s=STEPS[idx];
-  if(s.id==="text1")    renderText1(c);
-  else if(s.id==="zuord")  renderZuord(c);
-  else if(s.id==="quiz1")  renderQuiz(c,QUIZ1,"❓ Fragen zum Aufbau",1);
-  else if(s.id==="video")  renderVideo(c);
-  else if(s.id==="quiz2")  renderQuiz(c,QUIZ2,"❓ Fragen zum Video",2);
-  else if(s.id==="expIntro")renderExpIntro(c);
-  else if(s.id==="expMain") renderExpMain(c);
-  else if(s.id==="expExp")  renderExpExp(c);
-  else if(s.id==="reflect") renderReflect(c);
+  var box=document.getElementById("box");
+  box.innerHTML="";
+  var steps=["t1","zu","q1","vi","q2","ei","em","ee","re"];
+  var s=steps[idx];
+  if(s==="t1") renderT1(box);
+  else if(s==="zu") renderZu(box);
+  else if(s==="q1") renderQuiz(box,Q1,"Fragen zum Aufbau",1);
+  else if(s==="vi") renderVid(box);
+  else if(s==="q2") renderQuiz(box,Q2,"Fragen zum Video",2);
+  else if(s==="ei") renderEI(box);
+  else if(s==="em") renderEM(box);
+  else if(s==="ee") renderEE(box);
+  else if(s==="re") renderRe(box);
 }
 
-// ════════════════════════════════════════
-// TEXT 1
-// ════════════════════════════════════════
-function renderText1(c){
-  c.innerHTML=`
-  <div class="card">
-    <div class="badge">📖 Sachtext 1 – Aufbau des Auges</div>
-    <h3>Wie ist unser Auge aufgebaut?</h3>
-    <p>Das Auge ist unser wichtigstes Sinnesorgan. Schau dir das Schaubild genau an, während du den Text liest.</p>
-    <div class="img-wrap">
-      <img src="AufbauAuge.jpg" alt="Aufbau des Auges" onclick="openImg(this.src)">
-      <div class="img-hint">🔍 Auf das Bild klicken für Vollbild</div>
-    </div>
-    <p>Von außen erkennst du die <strong>Hornhaut</strong> – eine durchsichtige, gewölbte Schutzschicht. Dahinter liegt die farbige <strong>Iris</strong>, die deine Augenfarbe bestimmt. In ihrer Mitte befindet sich die <strong>Pupille</strong> – die schwarze Öffnung, durch die Licht ins Auge gelangt.</p>
-    <p>Hinter der Pupille liegt die <strong>Linse</strong>. Sie bündelt das Licht auf die <strong>Netzhaut</strong> auf der Rückseite des Auges. Dort sitzen Millionen Sinneszellen: <strong>Stäbchen</strong> (Hell/Dunkel) und <strong>Zapfen</strong> (Farben).</p>
-    <p>Die Signale der Netzhaut werden über den <strong>Sehnerv</strong> ans <strong>Gehirn</strong> geleitet. Erst das Gehirn erzeugt das vollständige Bild, das wir bewusst wahrnehmen.</p>
-    <div class="info-box">💡 Das Auge ist nur 24 mm groß – enthält aber über 130 Millionen Sinneszellen!</div>
-    <p>Das <strong>Augenlid</strong> schützt das Auge durch reflexartiges Schließen. Die <strong>Tränenflüssigkeit</strong> hält die Oberfläche feucht, sauber und keimfrei.</p>
-    <div class="warn-box">🤔 <strong>Denke schon mal nach:</strong> Der Sehnerv verlässt das Auge an einer bestimmten Stelle. Was könnte das für unser Sehen bedeuten? Du wirst es im Experiment selbst herausfinden!</div>
-    <div class="success-box">👁️ <strong>Alltagsbeispiel:</strong> Wenn du nach draußen in die Sonne gehst, kneifen die Augen kurz – die Pupille wird kleiner, um sie vor zu viel Licht zu schützen. Genau dieses Prinzip erlebst du auch im Experiment am Ende dieses Moduls!</div>
-    <div class="nav-row"><button class="btn-next" onclick="next()">Weiter zur Zuordnung →</button></div>
-  </div>`;
+function renderT1(c){
+  c.innerHTML='<div class="card">'
+    +'<div class="bg">Sachtext 1 - Aufbau des Auges</div>'
+    +'<h3>Wie ist unser Auge aufgebaut?</h3>'
+    +'<p>Das Auge ist unser wichtigstes Sinnesorgan. Schau dir das Schaubild genau an, waehrend du den Text liest.</p>'
+    +'<div class="iw"><img src="AufbauAuge.jpg" alt="Aufbau des Auges" onclick="openImg(this.src)"><div class="ih">Auf das Bild klicken fuer Vollbild</div></div>'
+    +'<p>Von aussen erkennst du die <strong>Hornhaut</strong> - eine durchsichtige, gewoelbte Schutzschicht. Dahinter liegt die farbige <strong>Iris</strong>, die deine Augenfarbe bestimmt. In ihrer Mitte befindet sich die <strong>Pupille</strong> - die schwarze Oeffnung, durch die Licht ins Auge gelangt.</p>'
+    +'<p>Hinter der Pupille liegt die <strong>Linse</strong>. Sie buendelt das Licht auf die <strong>Netzhaut</strong> auf der Rueckseite des Auges. Dort sitzen Millionen Sinneszellen: <strong>Staebchen</strong> (Hell/Dunkel) und <strong>Zapfen</strong> (Farben).</p>'
+    +'<p>Die Signale der Netzhaut werden ueber den <strong>Sehnerv</strong> ans <strong>Gehirn</strong> geleitet. Erst das Gehirn erzeugt das vollstaendige Bild.</p>'
+    +'<div class="ib">Das Auge ist nur 24 mm gross - enthaelt aber ueber 130 Millionen Sinneszellen!</div>'
+    +'<p>Das <strong>Augenlid</strong> schuetzt das Auge durch reflexartiges Schliessen. Die <strong>Traenenfluessigkeit</strong> haelt die Oberflaeche feucht, sauber und keimfrei.</p>'
+    +'<div class="wb"><strong>Denke schon mal nach:</strong> Der Sehnerv verlaesst das Auge an einer bestimmten Stelle. Was koennte das fuer unser Sehen bedeuten? Du wirst es im Experiment selbst herausfinden!</div>'
+    +'<div class="sb"><strong>Alltagsbeispiel:</strong> Wenn du nach draussen in die Sonne gehst, kneifen die Augen kurz - die Pupille wird kleiner, um sie vor zu viel Licht zu schuetzen.</div>'
+    +'<div class="nr"><button class="bn" onclick="next()">Weiter zur Zuordnung</button></div>'
+    +'</div>';
 }
 
-// ════════════════════════════════════════
-// ZUORDNUNG
-// ════════════════════════════════════════
-function renderZuord(c){
-  const terms=["Hornhaut","Iris","Pupille","Linse","Netzhaut","Sehnerv","Stäbchen & Zapfen","Gehirn"];
-  const slots=[
-    {id:"z1",lbl:"Äußere durchsichtige Schutzschicht",ans:"Hornhaut"},
-    {id:"z2",lbl:"Farbiger Ringmuskel – bestimmt die Augenfarbe",ans:"Iris"},
-    {id:"z3",lbl:"Schwarze Öffnung, durch die Licht ins Auge fällt",ans:"Pupille"},
-    {id:"z4",lbl:"Bündelt das Licht auf die Netzhaut",ans:"Linse"},
-    {id:"z5",lbl:"Innenauskleidung mit Millionen Sinneszellen",ans:"Netzhaut"},
-    {id:"z6",lbl:"Leitet Signale vom Auge zum Gehirn",ans:"Sehnerv"},
-    {id:"z7",lbl:"Sinneszellen für Hell/Dunkel und Farben",ans:"Stäbchen & Zapfen"},
-    {id:"z8",lbl:"Verarbeitet die Signale und erzeugt das Bild",ans:"Gehirn"},
+var Q1=[
+  {q:"Was macht die Iris im Auge?",
+   o:["Sie buendelt das Licht auf die Netzhaut","Sie regelt die Pupillengroesse und bestimmt die Augenfarbe","Sie schuetzt das Auge von aussen","Sie wandelt Licht in Signale um"],
+   c:1,e:"Die Iris ist der farbige Ringmuskel - sie bestimmt die Augenfarbe und steuert, wie viel Licht durch die Pupille ins Auge faellt."},
+  {q:"Welche zwei Arten von Sinneszellen sitzen auf der Netzhaut?",
+   o:["Nerven und Fasern","Staebchen und Zapfen","Hornhaut und Linse","Iris und Pupille"],
+   c:1,e:"Staebchen erkennen Hell und Dunkel. Zapfen sind fuer das Farbsehen zustaendig."},
+  {q:"Wozu dient das Gehirn beim Sehen?",
+   o:["Es produziert die Traenenfluessigkeit","Es regelt die Pupillengroesse","Es verarbeitet die Signale vom Sehnerv und erzeugt das Bild","Es buendelt das Licht"],
+   c:2,e:"Ohne Gehirn ergeben die Signale des Auges kein Bild. Das Gehirn ist die eigentliche Bildverarbeitungszentrale!"}
+];
+var Q2=[
+  {q:"Was ist die Aufgabe des Augenlids und der Traenenfluessigkeit?",
+   o:["Augenlid buendelt Licht; Traenen sorgen fuer Farben","Augenlid schuetzt durch Schliessen; Traenen halten die Oberflaeche feucht und sauber","Augenlid leitet Licht weiter; Traenen aktivieren die Zapfen","Beide haben keine besondere Funktion"],
+   c:1,e:"Das Augenlid schliesst sich blitzschnell als Schutzreflex. Die Traenenfluessigkeit haelt das Auge feucht und schuetzt es vor Keimen."},
+  {q:"Wie erscheint das Bild auf der Netzhaut?",
+   o:["Aufrecht und farbig","Auf dem Kopf stehend und seitenverkehrt","Verschwommen und schwarz-weiss","Vergroessert und hell"],
+   c:1,e:"Die Linse wirft das Bild umgekehrt auf die Netzhaut - erst das Gehirn dreht es wieder in die richtige Position!"},
+  {q:"Was passiert mit der Pupille, wenn es sehr hell wird?",
+   o:["Sie wird groesser, um mehr Licht hereinzulassen","Sie wird kleiner, damit nicht zu viel Licht ins Auge faellt","Sie veraendert ihre Farbe","Sie verschwindet"],
+   c:1,e:"Bei hellem Licht zieht sich die Iris zusammen - die Pupille wird kleiner. Bei Dunkelheit oeffnet sie sich weit."},
+  {q:"Wofuer sind die Zapfen zustaendig?",
+   o:["Fuer das Sehen bei Dunkelheit","Fuer das Farbsehen bei gutem Licht","Fuer das Weiterleiten der Signale","Fuer das Scharfstellen der Linse"],
+   c:1,e:"Die Zapfen ermoeglichen das Farbsehen. Es gibt drei Typen: fuer Rot, Gruen und Blau."}
+];
+
+function renderZu(c){
+  var terms=["Hornhaut","Iris","Pupille","Linse","Netzhaut","Sehnerv","Staebchen und Zapfen","Gehirn"];
+  var slots=[
+    {id:"z1",l:"Aeussere durchsichtige Schutzschicht",a:"Hornhaut"},
+    {id:"z2",l:"Farbiger Ringmuskel - bestimmt die Augenfarbe",a:"Iris"},
+    {id:"z3",l:"Schwarze Oeffnung, durch die Licht ins Auge faellt",a:"Pupille"},
+    {id:"z4",l:"Buendelt das Licht auf die Netzhaut",a:"Linse"},
+    {id:"z5",l:"Innenauskleidung mit Millionen Sinneszellen",a:"Netzhaut"},
+    {id:"z6",l:"Leitet Signale vom Auge zum Gehirn",a:"Sehnerv"},
+    {id:"z7",l:"Sinneszellen fuer Hell/Dunkel und Farben",a:"Staebchen und Zapfen"},
+    {id:"z8",l:"Verarbeitet die Signale und erzeugt das Bild",a:"Gehirn"}
   ];
-  let sel=null,filled={},used={};
+  var sel=null,filled={},used={};
   function draw(){
-    c.innerHTML=`
-    <div class="card">
-      <div class="badge">🏷️ Zuordnung</div>
-      <h3>Was gehört wohin?</h3>
-      <p style="color:var(--text2);margin-bottom:.9rem"><strong style="color:var(--text)">So geht's:</strong> Klicke zuerst einen Begriff an (er leuchtet auf), dann klicke das passende Feld.</p>
-      <div class="img-wrap">
-        <img src="Zuordnung.jpg" alt="Auge Schaubild" onclick="openImg(this.src)" style="max-height:270px;object-fit:contain;">
-        <div class="img-hint">🔍 Bild vergrößern – als Hilfe beim Zuordnen nutzen</div>
-      </div>
-      <div class="term-pool-lbl">Begriffe</div>
-      <div class="term-pool">${terms.map(t=>`<div class="chip ${sel===t?'sel':''} ${used[t]?'used':''}" onclick="__zs('${t}')">${t}</div>`).join('')}</div>
-      <div>${slots.map((s,i)=>{const v=filled[s.id],ok=v&&v===s.ans,bad=v&&v!==s.ans;return`<div class="slot ${ok?'ok':bad?'bad':''}" onclick="__zd('${s.id}')"><span class="slot-n">${i+1}</span><span class="slot-lbl">${s.lbl}</span><span class="slot-val">${v?v+' '+(ok?'✓':bad?'✗':''):'<span style="color:var(--border)">— wählen —</span>'}</span></div>`;}).join('')}</div>
-      <div id="zfb" style="margin-top:.6rem"></div>
-      <div class="nav-row"><button class="btn-save" onclick="__zchk()">Überprüfen ✓</button></div>
-    </div>`;
+    var html='<div class="card"><div class="bg">Zuordnung</div><h3>Was gehoert wohin?</h3>'
+      +'<p style="color:var(--t2);margin-bottom:.9rem"><strong style="color:var(--t)">So geht\'s:</strong> Klicke zuerst einen Begriff an, dann das passende Feld.</p>'
+      +'<div class="iw"><img src="Zuordnung.jpg" alt="Auge" onclick="openImg(this.src)" style="max-height:270px;object-fit:contain;"><div class="ih">Bild vergroessern als Hilfe</div></div>'
+      +'<div class="tpl">Begriffe</div><div class="tp">';
+    terms.forEach(function(t){
+      html+='<div class="ch'+(sel===t?' sel':'')+(used[t]?' used':'')+'" onclick="__zs(\''+t+'\')">'+t+'</div>';
+    });
+    html+='</div><div>';
+    slots.forEach(function(s,i){
+      var v=filled[s.id],ok=v&&v===s.a,bad=v&&v!==s.a;
+      var slCls='sl'+(ok?' ok':bad?' bad':'');
+      var slVal=v?v:("- waehlen -");
+      html+='<div class="'+slCls+'" onclick="__zd(\''+s.id+'\')"><span class="sn">'+(i+1)+'</span><span class="sl2">'+s.l+'</span><span class="sv">'+slVal+'</span></div>';
+    });
+    html+='</div><div id="zfb" style="margin-top:.6rem"></div>'
+      +'<div class="nr"><button class="bs" onclick="__zck()">Ueberpruefen</button></div></div>';
+    c.innerHTML=html;
   }
-  window.__zs=t=>{if(used[t])return;sel=sel===t?null:t;draw();};
-  window.__zd=id=>{
+  window.__zs=function(t){if(used[t])return;sel=(sel===t)?null:t;draw();};
+  window.__zd=function(id){
     if(!sel)return;
-    Object.keys(filled).forEach(k=>{if(filled[k]===sel)delete filled[k];});
-    filled[id]=sel;terms.forEach(t=>{used[t]=Object.values(filled).includes(t);});sel=null;draw();
+    for(var k in filled){if(filled[k]===sel)delete filled[k];}
+    filled[id]=sel;
+    terms.forEach(function(t){used[t]=Object.values(filled).indexOf(t)>=0;});
+    sel=null;draw();
   };
-  window.__zchk=()=>{
-    let ok=0;slots.forEach(s=>{if(filled[s.id]===s.ans)ok++;});
-    const fb=document.getElementById("zfb");
-    if(ok===slots.length){fb.innerHTML=`<div class="fb correct show">🎉 Perfekt! Alle ${slots.length} richtig!</div>`;score+=slots.length;setTimeout(()=>next(),1500);}
-    else{slots.forEach(s=>{if(filled[s.id]&&filled[s.id]!==s.ans){used[filled[s.id]]=false;delete filled[s.id];}});draw();document.getElementById("zfb").innerHTML=`<div class="fb wrong show">${ok}/${slots.length} richtig – falsche Felder zurückgesetzt. Versuche es nochmal!</div>`;}
+  window.__zck=function(){
+    var ok=0;
+    slots.forEach(function(s){if(filled[s.id]===s.a)ok++;});
+    if(ok===slots.length){
+      document.getElementById("zfb").innerHTML='<div style="color:var(--a2);font-weight:700;margin-top:.5rem">Perfekt! Alle '+slots.length+' richtig!</div>';
+      score+=slots.length;setTimeout(function(){next();},1500);
+    } else {
+      slots.forEach(function(s){if(filled[s.id]&&filled[s.id]!==s.a){used[filled[s.id]]=false;delete filled[s.id];}});
+      draw();
+      document.getElementById("zfb").innerHTML='<div style="color:var(--a3);font-weight:700;margin-top:.5rem">'+ok+'/'+slots.length+' richtig - falsche Felder zurueckgesetzt.</div>';
+    }
   };
   draw();
 }
 
-// ════════════════════════════════════════
-// QUIZ ENGINE – correct answer expands
-// ════════════════════════════════════════
-const QUIZ1=[
-  {q:"Was macht die Iris im Auge?",
-   opts:["Sie bündelt das Licht auf die Netzhaut","Sie regelt die Pupillengröße und bestimmt die Augenfarbe","Sie schützt das Auge von außen","Sie wandelt Licht in Signale um"],
-   c:1,explain:"Die Iris ist der farbige Ringmuskel – sie bestimmt die Augenfarbe und steuert, wie viel Licht durch die Pupille ins Auge fällt."},
-  {q:"Welche zwei Arten von Sinneszellen sitzen auf der Netzhaut?",
-   opts:["Nerven und Fasern","Stäbchen und Zapfen","Hornhaut und Linse","Iris und Pupille"],
-   c:1,explain:"Stäbchen erkennen Hell und Dunkel – auch bei wenig Licht. Zapfen sind für das Farbsehen zuständig."},
-  {q:"Wozu dient das Gehirn beim Sehen?",
-   opts:["Es produziert die Tränenflüssigkeit","Es regelt die Pupillengröße","Es verarbeitet die Signale vom Sehnerv und erzeugt das Bild","Es bündelt das Licht"],
-   c:2,explain:"Ohne Gehirn ergeben die Signale des Auges kein Bild. Das Gehirn ist die eigentliche 'Bildverarbeitungszentrale'!"},
-];
-const QUIZ2=[
-  {q:"Was ist die Aufgabe des Augenlids und der Tränenflüssigkeit?",
-   opts:["Augenlid bündelt Licht; Tränen sorgen für Farben","Augenlid schützt durch Schließen; Tränen halten die Oberfläche feucht und sauber","Augenlid leitet Licht weiter; Tränen aktivieren die Zapfen","Beide haben keine besondere Funktion"],
-   c:1,explain:"Das Augenlid schließt sich blitzschnell als Schutzreflex. Die Tränenflüssigkeit hält das Auge feucht und schützt es vor Keimen."},
-  {q:"Wie erscheint das Bild auf der Netzhaut?",
-   opts:["Aufrecht und farbig","Auf dem Kopf stehend und seitenverkehrt","Verschwommen und schwarz-weiß","Vergrößert und hell"],
-   c:1,explain:"Die Linse wirft das Bild umgekehrt auf die Netzhaut – erst das Gehirn dreht es wieder in die richtige Position!"},
-  {q:"Was passiert mit der Pupille, wenn es sehr hell wird?",
-   opts:["Sie wird größer, um mehr Licht hereinzulassen","Sie wird kleiner, damit nicht zu viel Licht ins Auge fällt","Sie verändert ihre Farbe","Sie verschwindet"],
-   c:1,explain:"Bei hellem Licht zieht sich die Iris zusammen – die Pupille wird kleiner. Bei Dunkelheit öffnet sie sich weit."},
-  {q:"Wofür sind die Zapfen zuständig?",
-   opts:["Für das Sehen bei Dunkelheit","Für das Farbsehen bei gutem Licht","Für das Weiterleiten der Signale","Für das Scharfstellen der Linse"],
-   c:1,explain:"Die Zapfen ermöglichen das Farbsehen. Es gibt drei Typen: für Rot, Grün und Blau. Stäbchen hingegen sehen nur Hell/Dunkel, aber auch bei sehr schwachem Licht."},
-];
-
 function renderQuiz(c,qs,label,qid){
-  let qi=0,right=0;
-  const answers=[];
+  var qi=0,right=0,answers=[];
   function rq(){
     if(qi>=qs.length){
-      score+=right;
-      saved.quizAnswers[qid]=answers;
-      c.innerHTML=`<div class="card">
-        <div class="badge">${label}</div>
-        <div style="text-align:center;padding:1rem 0">
-          <div style="font-size:2.2rem;margin-bottom:.4rem">${right===qs.length?'🎉':'👍'}</div>
-          <h3>${right}/${qs.length} Fragen richtig</h3>
-          <p style="color:var(--text2);margin-top:.35rem">${right===qs.length?'Perfekt gemacht!':'Gut – weiter geht\'s!'}</p>
-        </div>
-        <div class="nav-row"><button class="btn-next" onclick="next()">Weiter →</button></div>
-      </div>`;return;
+      score+=right;saved.qa[qid]=answers;
+      c.innerHTML='<div class="card"><div class="bg">'+label+'</div>'
+        +'<div style="text-align:center;padding:1rem 0">'
+        +'<div style="font-size:2rem;margin-bottom:.4rem">'+(right===qs.length?'Super!':'Gut!')+' </div>'
+        +'<h3>'+right+'/'+qs.length+' Fragen richtig</h3></div>'
+        +'<div class="nr"><button class="bn" onclick="next()">Weiter</button></div></div>';
+      return;
     }
-    const q=qs[qi];
-    c.innerHTML=`<div class="card">
-      <div class="badge">${label} (${qi+1}/${qs.length})</div>
-      <div class="q-txt">${q.q}</div>
-      <div class="opts">${q.opts.map((o,i)=>`<button class="opt" onclick="__qa(${i})" data-i="${i}">${o}<span class="opt-explain"></span></button>`).join('')}</div>
-      <div class="fb" id="qfb"></div>
-    </div>`;
+    var q=qs[qi];
+    var html='<div class="card"><div class="bg">'+label+' ('+(qi+1)+'/'+qs.length+')</div>'
+      +'<div class="qt">'+q.q+'</div><div class="os">';
+    q.o.forEach(function(o,i){
+      html+='<button class="op" onclick="__qa('+i+')" data-i="'+i+'">'+o+'<span class="oe"></span></button>';
+    });
+    html+='</div></div>';
+    c.innerHTML=html;
   }
-  window.__qa=idx=>{
-    const q=qs[qi];
-    const btns=document.querySelectorAll(".opt");
-    btns.forEach(b=>b.disabled=true);
-    const isRight=idx===q.c;
-    btns[idx].classList.add(isRight?"correct":"wrong");
+  window.__qa=function(i){
+    var q=qs[qi];
+    var btns=document.querySelectorAll(".op");
+    btns.forEach(function(b){b.disabled=true;});
+    btns[i].classList.add(i===q.c?"correct":"wrong");
     btns[q.c].classList.add("correct");
-    // expand correct answer with explanation
-    btns[q.c].querySelector(".opt-explain").textContent=q.explain;
-    answers.push({q:q.q,chosen:q.opts[idx],correct:q.opts[q.c],wasRight:isRight});
-    if(isRight)right++;
-    setTimeout(()=>{qi++;rq();},2400);
+    btns[q.c].querySelector(".oe").textContent=q.e;
+    answers.push({q:q.q,chosen:q.o[i],correct:q.o[q.c],wasRight:i===q.c});
+    if(i===q.c)right++;
+    setTimeout(function(){qi++;rq();},2400);
   };
   rq();
 }
 
-// ════════════════════════════════════════
-// VIDEO
-// ════════════════════════════════════════
-function renderVideo(c){
-  c.innerHTML=`
-  <div class="card">
-    <div class="badge">🎬 Erklär-Video</div>
-    <h3>So funktioniert das Sehen</h3>
-    <p style="color:var(--text2);margin-bottom:.9rem">Schau dir das Video aufmerksam an – danach kommen Fragen dazu!</p>
-    <div class="vid-wrap">
-      <iframe src="https://www.youtube-nocookie.com/embed/8Yn60LL71UU"
-        title="Wie funktioniert das Auge?" frameborder="0"
-        allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture"
-        allowfullscreen></iframe>
-    </div>
-    <div class="info-box" style="margin-top:.75rem">
-      📝 <strong>Achte im Video auf:</strong>
-      <ul style="margin-top:.4rem;padding-left:1.1rem;">
-        <li>Was machen Augenlid und Tränenflüssigkeit?</li>
-        <li>Wie erscheint das Bild auf der Netzhaut – steht es aufrecht?</li>
-        <li>Wie reagiert die Pupille auf Licht?</li>
-        <li>Was unterscheidet Stäbchen und Zapfen?</li>
-      </ul>
-    </div>
-    <div class="nav-row"><button class="btn-next" onclick="next()">Video gesehen – weiter →</button></div>
-  </div>`;
+function renderVid(c){
+  c.innerHTML='<div class="card"><div class="bg">Erklaer-Video</div>'
+    +'<h3>So funktioniert das Sehen</h3>'
+    +'<p style="color:var(--t2);margin-bottom:.9rem">Schau dir das Video aufmerksam an - danach kommen Fragen dazu!</p>'
+    +'<div class="vw"><iframe src="https://www.youtube-nocookie.com/embed/8Yn60LL71UU" title="Auge" frameborder="0" allowfullscreen></iframe></div>'
+    +'<div class="ib"><strong>Achte auf:</strong><ul style="margin-top:.4rem;padding-left:1.1rem;"><li>Was machen Augenlid und Traenenfluessigkeit?</li><li>Wie erscheint das Bild auf der Netzhaut?</li><li>Wie reagiert die Pupille auf Licht?</li><li>Was unterscheidet Staebchen und Zapfen?</li></ul></div>'
+    +'<div class="nr"><button class="bn" onclick="next()">Video gesehen - weiter</button></div></div>';
 }
 
-// ════════════════════════════════════════
-// EXPERIMENT INTRO (neue Version)
-// ════════════════════════════════════════
-function renderExpIntro(c){
-  let chosen=saved.hypChoice||"";
+function renderEI(c){
+  var chosen=saved.hc||"";
   function draw(){
-    c.innerHTML=`
-    <div class="card">
-      <div class="badge">🔬 Experiment – Vorbereitung</div>
-      <h3>Der blinde Fleck – Experiment zum Auge</h3>
-
-      <div class="phase-t" style="color:var(--accent);margin-top:.5rem">🔎 Einstieg</div>
-      <p>Unser Auge hilft uns, die Welt zu sehen. Wenn wir die Augen offen haben, denken wir meistens: <em>Wir sehen alles, was vor uns ist.</em></p>
-      <p style="margin-top:.5rem"><strong style="color:var(--text)">Aber stimmt das wirklich?</strong></p>
-      <p style="margin-top:.5rem">Das wollen wir jetzt mit einem kleinen Experiment herausfinden.</p>
-
-      <div class="phase-t" style="color:var(--accent5);margin-top:1.25rem">🔬 Das Experiment</div>
-      <p>Auf einem Blatt siehst du zwei Zeichen: ein <strong>Kreuz</strong> und einen <strong>Punkt</strong>. Du wirst gleich nur auf das Kreuz schauen und das Blatt langsam bewegen.</p>
-
-      <div class="phase-t" style="color:var(--accent4);margin-top:1.25rem">💭 Deine Hypothese</div>
-      <p style="color:var(--text2);margin-bottom:.75rem">Was glaubst du: <strong style="color:var(--text)">Was wird passieren?</strong></p>
-
-      <div class="radio-opts">
-        <label class="radio-opt ${chosen==='a'?'chosen':''}" onclick="__pickHyp('a')">
-          <input type="radio" name="hyp" value="a" ${chosen==='a'?'checked':''}>
-          <span>Ich werde das Kreuz und den Punkt die ganze Zeit sehen.</span>
-        </label>
-        <label class="radio-opt ${chosen==='b'?'chosen':''}" onclick="__pickHyp('b')">
-          <input type="radio" name="hyp" value="b" ${chosen==='b'?'checked':''}>
-          <span>Der Punkt könnte plötzlich verschwinden, obwohl ich auf das Blatt schaue.</span>
-        </label>
-      </div>
-
-      ${chosen?`<div class="field" style="margin-top:.75rem">
-        <label>Erkläre kurz, warum du das glaubst (eigene Worte):</label>
-        <div class="helpers">${["weil","der Sehnerv","das Auge","eine Stelle","nicht sehen kann","das Gehirn","alles sieht","ausgleicht"].map(w=>`<span class="hw" onclick="insertH('hypNote','${w}')">${w}</span>`).join('')}</div>
-        <textarea id="hypNote" rows="3" placeholder="Ich glaube das, weil ...">${saved.hyp}</textarea>
-      </div>
-      <div class="nav-row"><button class="btn-save" onclick="saveHyp()">Speichern & weiter →</button></div>`:''}
-    </div>`;
+    var html='<div class="card"><div class="bg">Experiment - Vorbereitung</div>'
+      +'<h3>Der blinde Fleck - Experiment zum Auge</h3>'
+      +'<div class="pt" style="color:var(--a);margin-top:.5rem">Einstieg</div>'
+      +'<p>Unser Auge hilft uns, die Welt zu sehen. Wenn wir die Augen offen haben, denken wir meistens: <em>Wir sehen alles, was vor uns ist.</em></p>'
+      +'<p style="margin-top:.5rem"><strong style="color:var(--t)">Aber stimmt das wirklich?</strong></p>'
+      +'<p style="margin-top:.5rem">Das wollen wir jetzt mit einem kleinen Experiment herausfinden.</p>'
+      +'<div class="pt" style="color:var(--a5);margin-top:1.25rem">Das Experiment</div>'
+      +'<p>Auf einem Blatt siehst du zwei Zeichen: ein Kreuz und einen Punkt. Du wirst gleich nur auf das Kreuz schauen und das Blatt langsam bewegen.</p>'
+      +'<div class="pt" style="color:var(--a4);margin-top:1.25rem">Deine Hypothese</div>'
+      +'<p style="color:var(--t2);margin-bottom:.75rem">Was glaubst du: <strong style="color:var(--t)">Was wird passieren?</strong></p>'
+      +'<div class="ro">'
+      +'<label class="rop'+(chosen==="a"?" chosen":"")+'" onclick="__ph(\'a\')">'
+      +'<input type="radio" name="hyp" value="a"'+(chosen==="a"?" checked":"")+'>'
+      +'<span>Ich werde das Kreuz und den Punkt die ganze Zeit sehen.</span></label>'
+      +'<label class="rop'+(chosen==="b"?" chosen":"")+'" onclick="__ph(\'b\')">'
+      +'<input type="radio" name="hyp" value="b"'+(chosen==="b"?" checked":"")+'>'
+      +'<span>Der Punkt koennte ploetzlich verschwinden, obwohl ich auf das Blatt schaue.</span></label>'
+      +'</div>';
+    if(chosen){
+      html+='<div class="fl" style="margin-top:.75rem">'
+        +'<label>Erklaere kurz, warum du das glaubst:</label>'
+        +'<div class="hw">';
+      ["weil","der Sehnerv","das Auge","eine Stelle","nicht sehen kann","das Gehirn","ausgleicht"].forEach(function(w){
+        html+='<span class="hwb" onclick="insH(\'hTa\',\''+w+'\')">'+w+'</span>';
+      });
+      html+='</div><textarea id="hTa" rows="3" placeholder="Ich glaube das, weil ...">'+saved.hyp+'</textarea></div>'
+        +'<div class="nr"><button class="bs" onclick="saveHyp()">Speichern und weiter</button></div>';
+    }
+    html+='</div>';
+    c.innerHTML=html;
   }
-  window.__pickHyp=v=>{chosen=v;saved.hypChoice=v;draw();};
+  window.__ph=function(v){chosen=v;saved.hc=v;draw();};
   draw();
 }
 function saveHyp(){
-  saved.hyp=document.getElementById("hypNote")?.value?.trim()||"";
+  var el=document.getElementById("hTa");
+  saved.hyp=el?el.value.trim():"";
   next();
 }
 
-// ════════════════════════════════════════
-// EXPERIMENT MAIN
-// ════════════════════════════════════════
-function renderExpMain(c){
-  const steps=[
+function renderEM(c){
+  var steps=[
     "Nimm ein Blatt Papier und einen Stift.",
-    "Zeichne links ein großes <strong>+ (Kreuz)</strong> und rechts einen großen <strong>● (Punkt)</strong> – Abstand ca. <strong>15 cm</strong>.",
+    "Zeichne links ein grosses <strong>+ (Kreuz)</strong> und rechts einen grossen <strong>Punkt</strong> - Abstand ca. <strong>15 cm</strong>.",
     "Halte das Blatt in <strong>Armabstand</strong> vor dich.",
-    "Schließe dein <strong>rechtes Auge</strong>.",
-    "Schaue mit dem <strong>linken Auge fest auf das +</strong> – blicke nicht ab!",
+    "Schliesse dein <strong>rechtes Auge</strong>.",
+    "Schaue mit dem <strong>linken Auge fest auf das +</strong> - blicke nicht ab!",
     "Bewege das Blatt <strong>langsam auf dich zu</strong>.",
-    "Beobachte: <strong>Was passiert mit dem ● auf der rechten Seite?</strong>",
+    "Beobachte: <strong>Was passiert mit dem Punkt auf der rechten Seite?</strong>"
   ];
-  let chk=new Array(steps.length).fill(false);
+  var chk=[];
+  for(var i=0;i<steps.length;i++)chk.push(false);
   function draw(){
-    c.innerHTML=`
-    <div class="card">
-      <div class="badge">🔬 Experiment – Durchführung</div>
-      <h3>Führe das Experiment durch!</h3>
-
-      <div class="phase-t" style="color:var(--accent5)">🧰 Material</div>
-      <p style="color:var(--text2)">Ein Blatt Papier, ein Stift</p>
-
-      <div class="phase-t" style="color:var(--accent5);margin-top:1rem">✏️ Versuchsaufbau – zeichne dein Blatt so:</div>
-      <div class="img-wrap">
-        <img src="Versuchsaufbau.jpg" alt="Versuchsaufbau" onclick="openImg(this.src)" style="max-height:200px;object-fit:contain;">
-        <div class="img-hint">🔍 Klicken für Vollbild</div>
-      </div>
-      <div class="info-box">
-        <strong>Zeichne auf dein Blatt:</strong>
-        <ul style="margin-top:.35rem;padding-left:1.1rem;">
-          <li>Links: ein großes <strong>schwarzes +</strong> (ca. 1 cm groß)</li>
-          <li>Rechts: einen großen <strong>schwarzen ●</strong> (ca. 1 cm groß)</li>
-          <li>Abstand: ca. <strong>15 cm</strong></li>
-        </ul>
-      </div>
-
-      <div class="phase-t" style="color:var(--accent5);margin-top:1rem">⚗️ Schritte – hake jeden ab!</div>
-      <div class="checklist">${steps.map((s,i)=>`
-        <div class="chk-item ${chk[i]?'done':''}" onclick="__chk(${i})">
-          <input type="checkbox" ${chk[i]?'checked':''} onclick="event.stopPropagation();__chk(${i})">
-          <span class="step-txt">${s}</span>
-        </div>`).join('')}
-      </div>
-
-      <div class="phase-t" style="color:var(--accent4);margin-top:1.25rem">👁️ Meine Beobachtung</div>
-      <p style="color:var(--text2);margin-bottom:.5rem">Was hast du beobachtet? Beschreibe so genau wie möglich!</p>
-      <div class="helpers">${["Bei einem Abstand von ca.","der Punkt","verschwand plötzlich","war nicht mehr sichtbar","tauchte wieder auf","ich habe das Blatt","langsam bewegt","der Punkt","blieb sichtbar"].map(w=>`<span class="hw" onclick="insertH('beobTa','${w}')">${w}</span>`).join('')}</div>
-      <div class="field">
-        <label>Meine Beobachtung:</label>
-        <textarea id="beobTa" rows="4" placeholder="Ich habe beobachtet, dass ...">${saved.beob}</textarea>
-        <div class="hint">Beschreibe genau was mit dem Punkt passiert ist.</div>
-      </div>
-      <div class="nav-row"><button class="btn-save" onclick="saveBeob()">Beobachtung speichern – Erklärung freischalten 🔓</button></div>
-    </div>`;
+    var html='<div class="card"><div class="bg">Experiment - Durchfuehrung</div><h3>Fuehre das Experiment durch!</h3>'
+      +'<div class="pt pt2">Material</div>'
+      +'<p style="color:var(--t2)">Ein Blatt Papier, ein Stift</p>'
+      +'<div class="pt pt2" style="margin-top:1rem">Versuchsaufbau - zeichne dein Blatt so:</div>'
+      +'<div class="iw"><img src="Versuchsaufbau.jpg" alt="Versuchsaufbau" onclick="openImg(this.src)" style="max-height:200px;object-fit:contain;"><div class="ih">Klicken fuer Vollbild</div></div>'
+      +'<div class="ib"><strong>Zeichne auf dein Blatt:</strong><ul style="margin-top:.35rem;padding-left:1.1rem;"><li>Links: ein grosses <strong>schwarzes +</strong></li><li>Rechts: einen grossen <strong>schwarzen Punkt</strong></li><li>Abstand: ca. <strong>15 cm</strong></li></ul></div>'
+      +'<div class="pt pt2" style="margin-top:1rem">Schritte - hake jeden ab!</div>'
+      +'<div class="cl">';
+    steps.forEach(function(s,i){
+      html+='<div class="ci'+(chk[i]?' done':'')+'" onclick="__ck('+i+')">'
+        +'<input type="checkbox"'+(chk[i]?' checked':'')+' onclick="event.stopPropagation();__ck('+i+')">'
+        +'<span class="st">'+s+'</span></div>';
+    });
+    html+='</div>'
+      +'<div class="pt" style="color:var(--a4);margin-top:1.25rem">Meine Beobachtung</div>'
+      +'<p style="color:var(--t2);margin-bottom:.5rem">Was hast du beobachtet?</p>'
+      +'<div class="hw">';
+    ["Bei einem Abstand von ca.","der Punkt","verschwand ploetzlich","war nicht mehr sichtbar","tauchte wieder auf","blieb sichtbar"].forEach(function(w){
+      html+='<span class="hwb" onclick="insH(\'bTa\',\''+w+'\')">'+w+'</span>';
+    });
+    html+='</div><div class="fl"><label>Meine Beobachtung:</label>'
+      +'<textarea id="bTa" rows="4" placeholder="Ich habe beobachtet, dass ...">'+saved.beob+'</textarea></div>'
+      +'<div class="nr"><button class="bs" onclick="saveBeob()">Beobachtung speichern</button></div></div>';
+    c.innerHTML=html;
   }
-  window.__chk=i=>{chk[i]=!chk[i];draw();};
+  window.__ck=function(i){chk[i]=!chk[i];draw();};
   draw();
 }
 function saveBeob(){
-  saved.beob=document.getElementById("beobTa")?.value?.trim()||"";
-  if(saved.beob.length<8){alert("Bitte beschreibe deine Beobachtung!");return;}
-  next();
+  var el=document.getElementById("bTa");
+  var v=el?el.value.trim():"";
+  if(v.length<5){alert("Bitte beschreibe deine Beobachtung!");return;}
+  saved.beob=v;next();
 }
 
-// ════════════════════════════════════════
-// EXPERIMENT ERKLÄRUNG + FRAGEN
-// ════════════════════════════════════════
-function renderExpExp(c){
-  const expQs=[
+function renderEE(c){
+  var eqs=[
     {q:"Warum ist der Punkt in deinem Experiment verschwunden?",
-     opts:["Weil das Papier zu weit weg war","Weil das Auge an der Stelle, wo der Sehnerv abgeht, nichts sehen kann","Weil der Punkt zu klein war","Weil das rechte Auge geschlossen war"],
-     c:1,explain:"Genau – an der Stelle, wo der Sehnerv das Auge verlässt, gibt es keine Stellen die sehen können. Deswegen verschwindet der Punkt an diesem Abstand."},
+     o:["Weil das Papier zu weit weg war","Weil das Auge an der Stelle, wo der Sehnerv abgeht, nichts sehen kann","Weil der Punkt zu klein war","Weil das rechte Auge geschlossen war"],
+     c:1,e:"Genau - an der Stelle, wo der Sehnerv das Auge verlaesst, gibt es keine Zellen die sehen koennen."},
     {q:"Warum bemerken wir den blinden Fleck im Alltag nicht?",
-     opts:["Weil er nur beim Lesen auftaucht","Weil das Gehirn die fehlende Stelle automatisch ergänzt und wir zwei Augen haben","Weil die Pupille ihn abdeckt","Weil die Netzhaut ihn ausgleicht"],
-     c:1,explain:"Das Gehirn ist sehr clever: Es füllt die Lücke mit dem, was ringsum zu sehen ist. Außerdem ergänzen sich beide Augen gegenseitig."},
+     o:["Weil er nur beim Lesen auftaucht","Weil das Gehirn die fehlende Stelle automatisch ergaenzt und wir zwei Augen haben","Weil die Pupille ihn abdeckt","Weil die Netzhaut ihn ausgleicht"],
+     c:1,e:"Das Gehirn fuellt die Luecke mit dem, was ringsum zu sehen ist. Ausserdem ergaenzen sich beide Augen gegenseitig."}
   ];
-  let qi=-1,right=0; // -1 = show intro first
-  const expAnswers=[];
-
+  var qi=-1,right=0,ea=[];
   function draw(){
     if(qi===-1){
-      c.innerHTML=`
-      <div class="card" style="animation:fadeUp .3s ease">
-        <div class="badge">💡 Erklärung – freigeschaltet!</div>
-        <h3>Was steckt hinter dem blinden Fleck?</h3>
-
-        <div class="hyp-card">
-          <div class="hyp-lbl">📝 Deine Hypothese war:</div>
-          <div class="hyp-txt">${saved.hypChoice==='b'?'Der Punkt könnte plötzlich verschwinden.':'Ich werde alles sehen.'} ${saved.hyp?'<br><em>'+saved.hyp+'</em>':''}</div>
-        </div>
-
-        <div class="phase-t" style="color:var(--accent2);margin-top:1rem">💡 Die Erklärung</div>
-        <p>Du hast es selbst erlebt: An einer bestimmten Stelle ist der Punkt verschwunden. Das ist der <strong>blinde Fleck</strong>.</p>
-        <p style="margin-top:.5rem">Das liegt daran, dass der <strong>Sehnerv</strong> das Auge an einer Stelle verlässt. An genau dieser Stelle kann das Auge nichts sehen – es gibt dort keine Zellen, die Licht wahrnehmen können.</p>
-
-        <div class="img-wrap">
-          <img src="blinderfleck.jpg" alt="Blinder Fleck" onclick="openImg(this.src)" style="max-height:230px;object-fit:contain;">
-          <div class="img-hint">🔍 Der blinde Fleck – hier verlässt der Sehnerv das Auge</div>
-        </div>
-
-        <p style="margin-top:.75rem">Im Alltag fällt uns das aber überhaupt nicht auf. Das liegt daran, dass unser <strong>Gehirn</strong> sehr clever ist: Es ergänzt einfach, was an der Lücke fehlt – so wie ein Puzzle-Stück, das automatisch eingesetzt wird. Außerdem haben wir zwei Augen, die sich gegenseitig helfen.</p>
-
-        <div class="info-box">💡 Dein Gehirn "erfindet" sozusagen, was in der Lücke sein sollte – und das so schnell, dass du es nie merkst!</div>
-
-        <div class="nav-row"><button class="btn-next" onclick="__eqNext()">Weiter – Verständnisfragen →</button></div>
-      </div>`;
-    } else if(qi<expQs.length){
-      const q=expQs[qi];
-      c.innerHTML=`<div class="card">
-        <div class="badge">❓ Fragen zur Erklärung (${qi+1}/${expQs.length})</div>
-        <div class="q-txt">${q.q}</div>
-        <div class="opts">${q.opts.map((o,i)=>`<button class="opt" onclick="__eqa(${i})" data-i="${i}">${o}<span class="opt-explain"></span></button>`).join('')}</div>
-        <div class="fb" id="efb"></div>
-      </div>`;
+      c.innerHTML='<div class="card">'
+        +'<div class="bg">Erklaerung - freigeschaltet!</div>'
+        +'<h3>Was steckt hinter dem blinden Fleck?</h3>'
+        +'<div class="hc"><div class="hl">Deine Hypothese war:</div>'
+        +'<div class="ht">'+(saved.hc==="b"?"Der Punkt koennte ploetzlich verschwinden.":"Ich werde alles sehen.")+(saved.hyp?" - "+saved.hyp:"")+'</div></div>'
+        +'<div class="pt" style="color:var(--a2);margin-top:1rem">Die Erklaerung</div>'
+        +'<p>Du hast es selbst erlebt: An einer bestimmten Stelle ist der Punkt verschwunden. Das ist der <strong>blinde Fleck</strong>.</p>'
+        +'<p style="margin-top:.5rem">Das liegt daran, dass der <strong>Sehnerv</strong> das Auge an einer Stelle verlaesst. An genau dieser Stelle kann das Auge nichts sehen.</p>'
+        +'<div class="iw"><img src="blinderfleck.jpg" alt="Blinder Fleck" onclick="openImg(this.src)" style="max-height:230px;object-fit:contain;"><div class="ih">Hier verlaesst der Sehnerv das Auge</div></div>'
+        +'<p style="margin-top:.75rem">Im Alltag faellt uns das nicht auf, weil das <strong>Gehirn</strong> die Luecke automatisch auffuellt - und wir zwei Augen haben, die sich gegenseitig helfen.</p>'
+        +'<div class="ib">Dein Gehirn erfindet sozusagen, was in der Luecke sein sollte!</div>'
+        +'<div class="nr"><button class="bn" onclick="__en()">Weiter - Verstaendnisfragen</button></div></div>';
+    } else if(qi<eqs.length){
+      var q=eqs[qi];
+      var html='<div class="card"><div class="bg">Fragen zur Erklaerung ('+(qi+1)+'/'+eqs.length+')</div>'
+        +'<div class="qt">'+q.q+'</div><div class="os">';
+      q.o.forEach(function(o,i){
+        html+='<button class="op" onclick="__eq('+i+')" data-i="'+i+'">'+o+'<span class="oe"></span></button>';
+      });
+      html+='</div></div>';
+      c.innerHTML=html;
     } else {
-      // FAZIT
-      score+=right;
-      saved.quizAnswers[3]=expAnswers;
-      c.innerHTML=`<div class="card">
-        <div class="badge">✍️ Zusammenfassung</div>
-        <h3>Fasse in eigenen Worten zusammen</h3>
-        <div class="hyp-card" style="margin-bottom:1rem">
-          <div class="hyp-lbl">📝 Deine ursprüngliche Hypothese:</div>
-          <div class="hyp-txt">${saved.hypChoice==='b'?'Der Punkt könnte verschwinden.':'Ich werde alles sehen.'} ${saved.hyp?'<br><em>'+saved.hyp+'</em>':''}</div>
-        </div>
-        <p style="color:var(--text2);margin-bottom:.75rem">War deine Hypothese richtig? Erkläre in 2–3 Sätzen, was du gelernt hast – in deinen eigenen Worten!</p>
-        <div class="helpers">${["Das Experiment hat gezeigt","der blinde Fleck","entsteht dort wo","der Sehnerv","das Auge verlässt","das Gehirn","füllt die Lücke","meine Hypothese war richtig","meine Hypothese war falsch","weil"].map(w=>`<span class="hw" onclick="insertH('fazitTa','${w}')">${w}</span>`).join('')}</div>
-        <div class="field">
-          <label>Mein Fazit:</label>
-          <textarea id="fazitTa" rows="4" placeholder="Das Experiment hat gezeigt, dass ...">${saved.fazit}</textarea>
-        </div>
-        <div class="nav-row"><button class="btn-save" onclick="saveFazit()">Speichern & zum Abschluss →</button></div>
-      </div>`;
+      score+=right;saved.qa[3]=ea;
+      c.innerHTML='<div class="card"><div class="bg">Zusammenfassung</div>'
+        +'<h3>Fasse in eigenen Worten zusammen</h3>'
+        +'<div class="hc" style="margin-bottom:1rem"><div class="hl">Deine urspruengliche Hypothese:</div>'
+        +'<div class="ht">'+(saved.hc==="b"?"Der Punkt koennte verschwinden.":"Ich werde alles sehen.")+(saved.hyp?" - "+saved.hyp:"")+'</div></div>'
+        +'<p style="color:var(--t2);margin-bottom:.75rem">War deine Hypothese richtig? Erklaere in 2-3 Saetzen was du gelernt hast.</p>'
+        +'<div class="hw">'
+        +["Das Experiment hat gezeigt","der blinde Fleck","dort wo","der Sehnerv","das Auge verlaesst","das Gehirn","fuellt die Luecke","richtig","falsch","weil"].map(function(w){
+          return '<span class="hwb" onclick="insH(\'fTa\',\''+w+'\')">'+w+'</span>';
+        }).join('')
+        +'</div>'
+        +'<div class="fl"><label>Mein Fazit:</label>'
+        +'<textarea id="fTa" rows="4" placeholder="Das Experiment hat gezeigt, dass ...">'+saved.fazit+'</textarea></div>'
+        +'<div class="nr"><button class="bs" onclick="saveFazit()">Speichern und weiter</button></div></div>';
     }
   }
-  window.__eqNext=()=>{qi=0;draw();};
-  window.__eqa=idx=>{
-    const q=expQs[qi];
-    document.querySelectorAll(".opt").forEach(b=>b.disabled=true);
-    document.querySelectorAll(".opt")[idx].classList.add(idx===q.c?"correct":"wrong");
-    document.querySelectorAll(".opt")[q.c].classList.add("correct");
-    document.querySelectorAll(".opt")[q.c].querySelector(".opt-explain").textContent=q.explain;
-    expAnswers.push({q:q.q,chosen:q.opts[idx],correct:q.opts[q.c],wasRight:idx===q.c});
-    if(idx===q.c)right++;
-    setTimeout(()=>{qi++;draw();},2400);
+  window.__en=function(){qi=0;draw();};
+  window.__eq=function(i){
+    var q=eqs[qi];
+    var btns=document.querySelectorAll(".op");
+    btns.forEach(function(b){b.disabled=true;});
+    btns[i].classList.add(i===q.c?"correct":"wrong");
+    btns[q.c].classList.add("correct");
+    btns[q.c].querySelector(".oe").textContent=q.e;
+    ea.push({q:q.q,chosen:q.o[i],correct:q.o[q.c],wasRight:i===q.c});
+    if(i===q.c)right++;
+    setTimeout(function(){qi++;draw();},2400);
   };
   draw();
 }
 function saveFazit(){
-  saved.fazit=document.getElementById("fazitTa")?.value?.trim()||"";
-  next();
+  var el=document.getElementById("fTa");
+  saved.fazit=el?el.value.trim():"";next();
 }
 
-// ════════════════════════════════════════
-// REFLEXION
-// ════════════════════════════════════════
-function renderReflect(c){
-  const rqs=[
-    {id:"verstanden",lbl:"Ich habe den Aufbau des Auges verstanden"},
-    {id:"spass",     lbl:"Das Experiment hat mir Spaß gemacht"},
-    {id:"schwierig", lbl:"Die Aufgaben waren für mich gut zu schaffen"},
+function renderRe(c){
+  var rqs=[
+    {id:"v",l:"Ich habe den Aufbau des Auges verstanden"},
+    {id:"s",l:"Das Experiment hat mir Spass gemacht"},
+    {id:"c",l:"Die Aufgaben waren gut zu schaffen"}
   ];
-  function stars(id,val){
-    return Array.from({length:5},(_,i)=>`<span class="star ${i<val?'on':''}" onclick="__star('${id}',${i+1})">★</span>`).join('');
-  }
   function draw(){
-    c.innerHTML=`
-    <div class="card">
-      <div class="badge">✅ Reflexion & Abschluss</div>
-      <h3>Wie hat es dir gefallen?</h3>
-      <p style="color:var(--text2);margin-bottom:1rem">Bewerte ehrlich – deine Antworten helfen deinem Lehrer!</p>
-      <div class="reflect-grid">${rqs.map(q=>`
-        <div class="reflect-row">
-          <label>${q.lbl}</label>
-          <div class="star-row">${stars(q.id,saved.reflect[q.id]||0)}</div>
-        </div>`).join('')}
-      </div>
-      <div class="field" style="margin-top:1rem">
-        <label>Was war schwierig? Was hat dir gut gefallen?</label>
-        <textarea id="rTa" rows="3" placeholder="Hier kannst du frei schreiben ...">${saved.reflectComment||""}</textarea>
-      </div>
-      <div class="nav-row"><button class="btn-next" onclick="saveReflect()">Zum Abschluss →</button></div>
-    </div>`;
+    var html='<div class="card"><div class="bg">Reflexion und Abschluss</div>'
+      +'<h3>Wie hat es dir gefallen?</h3>'
+      +'<p style="color:var(--t2);margin-bottom:1rem">Bewerte ehrlich!</p>'
+      +'<div class="rg">';
+    rqs.forEach(function(q){
+      var val=saved.ref[q.id]||0;
+      html+='<div class="rr"><label>'+q.l+'</label><div class="sr">';
+      for(var i=1;i<=5;i++){
+        html+='<span class="str'+(i<=val?" on":"")+'" onclick="__st(\''+q.id+'\','+i+')">&#9733;</span>';
+      }
+      html+='</div></div>';
+    });
+    html+='</div>'
+      +'<div class="fl" style="margin-top:1rem"><label>Was war schwierig? Was hat dir gut gefallen?</label>'
+      +'<textarea id="rTa" rows="3" placeholder="Hier kannst du frei schreiben ...">'+( saved.rc||"")+'</textarea></div>'
+      +'<div class="nr"><button class="bn" onclick="saveRe()">Zum Abschluss</button></div></div>';
+    c.innerHTML=html;
   }
-  window.__star=(id,v)=>{saved.reflect[id]=v;draw();};
+  window.__st=function(id,v){saved.ref[id]=v;draw();};
   draw();
 }
-function saveReflect(){
-  saved.reflectComment=document.getElementById("rTa")?.value||"";
-  next();
+function saveRe(){
+  var el=document.getElementById("rTa");
+  saved.rc=el?el.value:"";next();
 }
 
-// ════════════════════════════════════════
-// GOOGLE SHEETS SAVE
-// ════════════════════════════════════════
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyVVhp-QCwpiIKXa9IfudSjVZT6bPnjkuGALue2C9TrskD5dsfqo8QxtkQ3Z1vpj9206A/exec";
-
-function saveToSheets(){
-  const payload = {
-    name: sName + " 👁️",
-    score: score,
-    module: "Das Auge",
-    klasse: sClass,
-    datum: sDate
-  };
-  fetch(SCRIPT_URL, {
-    method: "POST",
-    mode: "no-cors",
-    headers: {"Content-Type":"application/json"},
-    body: JSON.stringify(payload)
-  }).catch(()=>{});
+var GURL="https://script.google.com/macros/s/AKfycbyVVhp-QCwpiIKXa9IfudSjVZT6bPnjkuGALue2C9TrskD5dsfqo8QxtkQ3Z1vpj9206A/exec";
+function saveSheets(){
+  fetch(GURL,{method:"POST",mode:"no-cors",headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({name:sName,score:score,module:"Das Auge",klasse:sClass,datum:sDate})
+  }).catch(function(){});
 }
-
-// ════════════════════════════════════════
-// DONE
-// ════════════════════════════════════════
-const NEXT_MODULES = [
-  {icon:"👂", title:"Das Ohr",        desc:"Aufbau, Funktion & Hörexperiment"},
-  {icon:"👃", title:"Die Nase",       desc:"Aufbau, Funktion & Riechexperiment"},
-  {icon:"👅", title:"Die Zunge",      desc:"Aufbau, Funktion & Schmeckexperiment"},
-  {icon:"✋", title:"Die Haut",       desc:"Aufbau, Funktion & Tastexperiment"},
-  {icon:"🧠", title:"Gehirn & Nerven",desc:"Aufbau, Funktion & Gehirnexperiment"},
-];
 
 function renderDone(){
   document.getElementById("pFill").style.width="100%";
   document.getElementById("pLbl").textContent=TOTAL+"/"+TOTAL;
-
-  // Save to Google Sheets
-  saveToSheets();
-  // Also store locally that Auge is done
-  localStorage.setItem("sinnes_auge_done", score);
-
-  const moduleCards = NEXT_MODULES.map(m => `
-    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:1rem 1.1rem;display:flex;align-items:center;gap:.85rem;opacity:.55;">
-      <div style="font-size:1.8rem;filter:grayscale(1)">${m.icon}</div>
-      <div>
-        <div style="font-weight:700;font-size:.95rem;color:var(--text2)">${m.title}</div>
-        <div style="font-size:.8rem;color:var(--text2);margin-top:.15rem">${m.desc}</div>
-        <div style="font-size:.75rem;color:var(--border);margin-top:.3rem;font-weight:700;">🔒 Noch nicht verfügbar</div>
-      </div>
-    </div>`).join('');
-
-  document.getElementById("stepBox").innerHTML=`
-  <div class="done-card">
-    <div class="big">&#9989;</div>
-    <h2>Das Auge – abgeschlossen!</h2>
-    <p style="color:var(--text2);margin-bottom:1.25rem">Sehr gut gemacht, ${sName}!</p>
-    <div style="background:var(--surface2);border-radius:12px;padding:1rem;margin-bottom:1.5rem">
-      <div class="score-n">${score}</div>
-      <div style="color:var(--text2);font-size:.88rem;margin-top:.2rem">Punkte erreicht</div>
-    </div>
-    <button class="btn-pdf" onclick="makePDF()" style="width:100%;justify-content:center;margin-bottom:.65rem;">&#128196; Protokoll als PDF herunterladen</button>
-
-    <div style="margin-top:1.75rem;text-align:left;">
-      <div style="font-family:'Outfit',sans-serif;font-weight:800;font-size:1rem;margin-bottom:.85rem;color:var(--text)">
-        🔍 Weitere Sinnesdetektiv-Module
-      </div>
-      <div style="display:flex;flex-direction:column;gap:.5rem;">
-        ${moduleCards}
-      </div>
-      <p style="color:var(--text2);font-size:.8rem;margin-top:.85rem;text-align:center;">
-        Die weiteren Module werden von deinem Lehrer freigeschaltet.
-      </p>
-    </div>
-  </div>`;
+  saveSheets();
+  try{localStorage.setItem("sinnes_auge_done",score);}catch(e){}
+  var mods=[
+    {e:"&#128066;",t:"Das Ohr",d:"Aufbau, Funktion und Hoerexperiment"},
+    {e:"&#128067;",t:"Die Nase",d:"Aufbau, Funktion und Riechexperiment"},
+    {e:"&#128069;",t:"Die Zunge",d:"Aufbau, Funktion und Schmeckexperiment"},
+    {e:"&#9995;",t:"Die Haut",d:"Aufbau, Funktion und Tastexperiment"},
+    {e:"&#129504;",t:"Gehirn und Nerven",d:"Aufbau, Funktion und Gehirnexperiment"}
+  ];
+  var mc=mods.map(function(m){
+    return '<div style="background:var(--s2);border:1px solid var(--bd);border-radius:12px;padding:1rem;display:flex;align-items:center;gap:.85rem;opacity:.5;">'
+      +'<div style="font-size:1.8rem;">'+m.e+'</div>'
+      +'<div><div style="font-weight:700;color:var(--t2);">'+m.t+'</div>'
+      +'<div style="font-size:.8rem;color:var(--t2);">'+m.d+'</div>'
+      +'<div style="font-size:.75rem;color:var(--bd);font-weight:700;margin-top:.25rem;">Noch nicht verfuegbar</div></div></div>';
+  }).join('');
+  document.getElementById("box").innerHTML='<div class="dc">'
+    +'<div style="font-size:3rem;margin-bottom:.85rem;">&#9989;</div>'
+    +'<h2>Das Auge - abgeschlossen!</h2>'
+    +'<p style="color:var(--t2);margin-bottom:1.25rem">Sehr gut gemacht, '+sName+'!</p>'
+    +'<div style="background:var(--s2);border-radius:12px;padding:1rem;margin-bottom:1.5rem">'
+    +'<div class="sco">'+score+'</div>'
+    +'<div style="color:var(--t2);font-size:.88rem;margin-top:.2rem">Punkte erreicht</div></div>'
+    +'<button class="bpdf" onclick="makePDF()" style="width:100%;justify-content:center;margin-bottom:.65rem;">Protokoll als PDF herunterladen</button>'
+    +'<div style="margin-top:1.75rem;text-align:left;">'
+    +'<div style="font-family:Outfit,sans-serif;font-weight:800;font-size:1rem;margin-bottom:.85rem;">Weitere Sinnesdetektiv-Module</div>'
+    +'<div style="display:flex;flex-direction:column;gap:.5rem;">'+mc+'</div>'
+    +'<p style="color:var(--t2);font-size:.8rem;margin-top:.85rem;text-align:center;">Die weiteren Module werden von deinem Lehrer freigeschaltet.</p>'
+    +'</div></div>';
 }
 
-// ════════════════════════════════════════
-// HELPERS
-// ════════════════════════════════════════
-function insertH(id,w){
-  const ta=document.getElementById(id);if(!ta)return;
-  const p=ta.selectionStart,b=ta.value.substring(0,p),a=ta.value.substring(p);
-  const sep=b.length>0&&!b.endsWith(" ")?" ":"";
-  ta.value=b+sep+w+" "+a;ta.selectionStart=ta.selectionEnd=p+sep.length+w.length+1;ta.focus();
+function insH(id,w){
+  var ta=document.getElementById(id);
+  if(!ta)return;
+  var p=ta.selectionStart,b=ta.value.substring(0,p),a=ta.value.substring(p);
+  var sep=(b.length>0&&b[b.length-1]!==" ")?" ":"";
+  ta.value=b+sep+w+" "+a;
+  ta.selectionStart=ta.selectionEnd=p+sep.length+w.length+1;
+  ta.focus();
 }
-function openImg(src){document.getElementById("overlayImg").src=src;document.getElementById("imgOverlay").classList.add("show");}
-function closeImg(){document.getElementById("imgOverlay").classList.remove("show");}
+function openImg(src){document.getElementById("oi").src=src;document.getElementById("ov").classList.add("show");}
+function closeImg(){document.getElementById("ov").classList.remove("show");}
 
-// ════════════════════════════════════════
-// PDF
 function makePDF(){
-  const {jsPDF}=window.jspdf;
-  const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
-  const W=210,H=297,ML=15,MR=195,TW=MR-ML;
-  let y=14;
-
-  const C={
-    bg:[13,17,23],surf:[22,27,34],surf2:[30,37,48],
-    border:[48,54,61],blue:[88,166,255],green:[63,185,80],
-    orange:[255,166,87],purple:[210,168,255],red:[247,129,102],
-    text:[220,230,240],text2:[139,148,158]
-  };
-
-  function setF(c){doc.setFillColor(...c);}
-  function setS(c,w=0.25){doc.setDrawColor(...c);doc.setLineWidth(w);}
-  function setT(c,sz,bold=false){doc.setTextColor(...c);doc.setFontSize(sz);doc.setFont("helvetica",bold?"bold":"normal");}
-  function chk(n=12){if(y+n>H-12){doc.addPage();setF(C.bg);doc.rect(0,0,W,H,"F");y=14;}}
-
-  // clean string: remove all non-latin chars that jsPDF can't handle
+  var jsPDF=window.jspdf.jsPDF;
+  var doc=new jsPDF({orientation:"portrait",unit:"mm",format:"a4"});
+  var W=210,H=297,ML=15,MR=195,TW=180;
+  var y=14;
+  function sf(r,g,b){doc.setFillColor(r,g,b);}
+  function ss(r,g,b,w){doc.setDrawColor(r,g,b);doc.setLineWidth(w||0.25);}
+  function st(r,g,b,sz,bold){doc.setTextColor(r,g,b);doc.setFontSize(sz);doc.setFont("helvetica",bold?"bold":"normal");}
+  function chk(n){if(y+(n||12)>H-12){doc.addPage();sf(13,17,23);doc.rect(0,0,W,H,"F");y=14;}}
   function cl(s){
     if(!s)return"";
-    return s.replace(/[^ -ÿ]/g,"").replace(/–/g,"-").replace(/—/g,"-")
-            .replace(/“|”/g,'"').replace(/‘|’/g,"'")
-            .replace(/ä/g,"ae").replace(/ö/g,"oe").replace(/ü/g,"ue")
-            .replace(/Ä/g,"Ae").replace(/Ö/g,"Oe").replace(/Ü/g,"Ue")
-            .replace(/ß/g,"ss");
+    return String(s).replace(/[\u0100-\uFFFF]/g,"").replace(/\u00e4/g,"ae").replace(/\u00f6/g,"oe")
+      .replace(/\u00fc/g,"ue").replace(/\u00c4/g,"Ae").replace(/\u00d6/g,"Oe")
+      .replace(/\u00dc/g,"Ue").replace(/\u00df/g,"ss").replace(/\u2013|\u2014/g,"-");
   }
-
-  function hdr(prefix,txt,col){
-    chk(12);
-    setT(col,9.5,true);
-    const full=prefix+" "+cl(txt);
-    doc.text(full,ML,y);
-    setS(col,0.4);doc.line(ML,y+1.8,ML+doc.getTextWidth(full),y+1.8);
-    y+=8;
+  function hd(pre,txt,r,g,b){
+    chk(12);st(r,g,b,9.5,true);
+    var full=pre+" "+cl(txt);
+    doc.text(full,ML,y);ss(r,g,b,0.4);doc.line(ML,y+1.8,ML+doc.getTextWidth(full),y+1.8);y+=8;
   }
-
-  function para(txt,col=C.text2,sz=9){
-    setT(col,sz);
-    const lines=doc.splitTextToSize(cl(txt),TW);
-    lines.forEach(l=>{chk(6);doc.text(l,ML,y);y+=5;});
-    y+=1;
+  function fb(txt,fr,fg,fb2,br,bg2,bb,tr,tg,tb2,pad){
+    pad=pad||4;
+    var lines=doc.splitTextToSize(cl(txt),TW-pad*2-2);
+    var bh=lines.length*5+pad+4;chk(bh+3);
+    sf(fr,fg,fb2);ss(br,bg2,bb,0.25);doc.roundedRect(ML,y,TW,bh,2,2,"FD");
+    st(tr,tg,tb2,8.5,false);lines.forEach(function(l,i){doc.text(l,ML+pad,y+pad+i*5);});y+=bh+4;
   }
-
-  function fillBox(txt,bg,border,tcol=C.text,pad=4){
-    const lines=doc.splitTextToSize(cl(txt),TW-pad*2-2);
-    const bh=lines.length*5+pad+4;
-    chk(bh+3);
-    setF(bg);setS(border,0.25);doc.roundedRect(ML,y,TW,bh,2,2,"FD");
-    setT(tcol,8.5);
-    lines.forEach((l,i)=>doc.text(l,ML+pad,y+pad+i*5));
-    y+=bh+4;
-  }
-
-  function answerBox(label,content,minH=16){
-    chk(minH+12);
-    setT(C.text2,8,true);doc.text(cl(label),ML,y);y+=4;
-    const lines=content?doc.splitTextToSize(cl(content),TW-8):[];
-    const bh=Math.max(minH,lines.length*5+7);
-    chk(bh+4);
-    setF(C.surf2);setS(C.border,0.25);doc.roundedRect(ML,y,TW,bh,2,2,"FD");
-    if(content){setT(C.text,8.5);lines.forEach((l,i)=>doc.text(l,ML+4,y+5+i*5));}
+  function ab(label,content,minH){
+    minH=minH||16;chk(minH+12);
+    st(139,148,158,8,true);doc.text(cl(label),ML,y);y+=4;
+    var lines=content?doc.splitTextToSize(cl(content),TW-8):[];
+    var bh=Math.max(minH,lines.length*5+7);chk(bh+4);
+    sf(30,37,48);ss(48,54,61,0.25);doc.roundedRect(ML,y,TW,bh,2,2,"FD");
+    if(content){st(220,230,240,8.5,false);lines.forEach(function(l,i){doc.text(l,ML+4,y+5+i*5);});}
     y+=bh+5;
   }
-
-  function divider(){chk(5);setS(C.border,0.2);doc.line(ML,y,MR,y);y+=6;}
-
-  function renderQuizBlock(answers){
-    if(!answers||answers.length===0){para("(Keine Antworten gespeichert)",C.text2,8.5);return;}
-    answers.forEach((a,i)=>{
-      chk(22);
-      setT(C.text,9,true);
-      const qlines=doc.splitTextToSize((i+1)+". "+cl(a.q),TW);
-      qlines.forEach(l=>{chk(6);doc.text(l,ML,y);y+=5;});
-      const isRight=a.wasRight;
-      // answer box
-      const atxt=(isRight?"[Richtig] ":"[Falsch] ")+"Deine Antwort: "+cl(a.chosen);
-      const alines=doc.splitTextToSize(atxt,TW-8);
-      const abh=alines.length*5+6;
-      chk(abh+3);
-      setF(isRight?[18,48,22]:[48,18,18]);setS(isRight?C.green:C.red,0.2);
-      doc.roundedRect(ML,y,TW,abh,2,2,"FD");
-      setT(isRight?C.green:C.red,8.5);
-      alines.forEach((l,j)=>doc.text(l,ML+4,y+5+j*5));
-      y+=abh+2;
-      if(!isRight){
-        const ctxt="Richtige Antwort: "+cl(a.correct);
-        const clines=doc.splitTextToSize(ctxt,TW-8);
-        const cbh=clines.length*5+6;
-        chk(cbh+3);
-        setF([18,48,22]);setS(C.green,0.2);
-        doc.roundedRect(ML,y,TW,cbh,2,2,"FD");
-        setT(C.green,8.5);
-        clines.forEach((l,j)=>doc.text(l,ML+4,y+5+j*5));
-        y+=cbh+2;
+  function div(){chk(5);ss(48,54,61,0.2);doc.line(ML,y,MR,y);y+=6;}
+  function qb(answers){
+    if(!answers||!answers.length){st(139,148,158,8.5,false);doc.text("(Keine Antworten gespeichert)",ML,y);y+=7;return;}
+    answers.forEach(function(a,i){
+      chk(22);st(220,230,240,9,true);
+      var ql=doc.splitTextToSize((i+1)+". "+cl(a.q),TW);
+      ql.forEach(function(l){chk(6);doc.text(l,ML,y);y+=5;});
+      var ok=a.wasRight;
+      var at=(ok?"[Richtig] ":"[Falsch] ")+"Antwort: "+cl(a.chosen);
+      var al=doc.splitTextToSize(at,TW-8);
+      var ah=al.length*5+6;chk(ah+3);
+      sf(ok?18:48,ok?48:18,ok?22:18);ss(ok?63:247,ok?185:129,ok?80:102,0.2);
+      doc.roundedRect(ML,y,TW,ah,2,2,"FD");
+      st(ok?63:247,ok?185:129,ok?80:102,8.5,false);
+      al.forEach(function(l,j){doc.text(l,ML+4,y+5+j*5);});y+=ah+2;
+      if(!ok){
+        var ct="Richtig: "+cl(a.correct);
+        var cl2=doc.splitTextToSize(ct,TW-8);
+        var ch=cl2.length*5+6;chk(ch+3);
+        sf(18,48,22);ss(63,185,80,0.2);doc.roundedRect(ML,y,TW,ch,2,2,"FD");
+        st(63,185,80,8.5,false);cl2.forEach(function(l,j){doc.text(l,ML+4,y+5+j*5);});y+=ch+2;
       }
       y+=4;
     });
   }
-
-  // === PAGE BG ===
-  setF(C.bg);doc.rect(0,0,W,H,"F");
-
-  // === HEADER ===
-  setF(C.surf);setS(C.blue,0.4);doc.roundedRect(ML-2,y-3,TW+4,32,3,3,"FD");
-  setT(C.blue,15,true);doc.text("Das Auge",ML+2,y+6);
-  setT(C.text2,8.5);doc.text("Sinnesdetektiv - Biologie Klasse 5/6",ML+2,y+13);
-  setT(C.text2,8);
+  sf(13,17,23);doc.rect(0,0,W,H,"F");
+  sf(22,27,34);ss(88,166,255,0.4);doc.roundedRect(ML-2,y-3,TW+4,32,3,3,"FD");
+  st(88,166,255,15,true);doc.text("Das Auge",ML+2,y+6);
+  st(139,148,158,8.5,false);doc.text("Sinnesdetektiv - Biologie Klasse 5/6",ML+2,y+13);
+  st(139,148,158,8,false);
   doc.text("Name: "+cl(sName),ML+2,y+21);
   doc.text("Klasse: "+cl(sClass),ML+55,y+21);
   doc.text("Datum: "+cl(sDate),ML+95,y+21);
   doc.text("Punkte: "+score,MR-5,y+21,{align:"right"});
   y+=38;
-
-  // === QUIZ 1 ===
-  hdr("1.","Fragen zum Aufbau",C.blue);
-  renderQuizBlock(saved.quizAnswers[1]);
-  divider();
-
-  // === QUIZ 2 ===
-  hdr("2.","Fragen zum Video",C.blue);
-  renderQuizBlock(saved.quizAnswers[2]);
-  divider();
-
-  // === EXPERIMENT ===
-  hdr("3.","Experiment: Der blinde Fleck",C.orange);
-
-  hdr("3a.","Fragestellung",C.blue);
-  fillBox("Hat unser Auge eine Stelle, an der es nichts sieht - obwohl das Auge offen ist?",C.surf2,C.blue);
-
-  hdr("3b.","Hypothese",C.purple);
-  const hypTxt=saved.hypChoice==="b"?"Der Punkt koennte verschwinden.":"Ich werde alles sehen.";
-  fillBox(hypTxt+(saved.hyp?" - "+saved.hyp:""),C.surf2,C.purple);
-
-  hdr("3c.","Material und Versuchsaufbau",C.orange);
-  para("- Ein Blatt Papier   - Ein Stift",C.text2,9);
-  fillBox("Zeichne: Links ein grosses + (Kreuz) und rechts einen grossen Punkt, Abstand ca. 15 cm.",C.surf2,C.orange,C.orange);
-
-  hdr("3d.","Durchfuehrung",C.orange);
-  const expSteps=[
-    "Blatt in Armabstand halten.",
-    "Rechtes Auge schliessen.",
-    "Mit linkem Auge fest auf das + schauen - nicht abschauen!",
-    "Blatt langsam auf sich zuziehen.",
-    "Beobachten, was mit dem Punkt passiert.",
-  ];
-  expSteps.forEach((s,i)=>{
-    chk(9);
-    setF(C.surf2);setS(C.border,0.2);doc.roundedRect(ML,y,TW,7.5,1.5,1.5,"FD");
-    setT(C.orange,8.5,true);doc.text(""+(i+1),ML+3,y+5.2);
-    setT(C.text2,8.5,false);doc.text(cl(s),ML+11,y+5.2);
-    y+=9;
+  hd("1.","Fragen zum Aufbau",88,166,255);qb(saved.qa[1]);div();
+  hd("2.","Fragen zum Video",88,166,255);qb(saved.qa[2]);div();
+  hd("3.","Experiment: Der blinde Fleck",255,166,87);
+  hd("3a.","Fragestellung",88,166,255);
+  fb("Hat unser Auge eine Stelle, an der es nichts sieht - obwohl das Auge offen ist?",22,27,34,88,166,255,220,230,240);
+  hd("3b.","Hypothese",210,168,255);
+  var ht=(saved.hc==="b"?"Der Punkt koennte verschwinden.":"Ich werde alles sehen.")+(saved.hyp?" - "+saved.hyp:"");
+  fb(ht,22,27,34,210,168,255,220,230,240);
+  hd("3c.","Material",255,166,87);
+  st(139,148,158,9,false);doc.text("- Ein Blatt Papier   - Ein Stift",ML,y);y+=7;
+  hd("3d.","Durchfuehrung",255,166,87);
+  var es=["Blatt in Armabstand halten.","Rechtes Auge schliessen.","Mit linkem Auge fest auf das + schauen.","Blatt langsam auf sich zuziehen.","Beobachten, was mit dem Punkt passiert."];
+  es.forEach(function(s,i){
+    chk(9);sf(30,37,48);ss(48,54,61,0.2);doc.roundedRect(ML,y,TW,7.5,1.5,1.5,"FD");
+    st(255,166,87,8.5,true);doc.text(""+(i+1),ML+3,y+5.2);
+    st(139,148,158,8.5,false);doc.text(cl(s),ML+11,y+5.2);y+=9;
   });
   y+=2;
-
-  hdr("3e.","Beobachtung",C.blue);
-  answerBox("Was habe ich beobachtet?",saved.beob||"",20);
-
-  hdr("3f.","Erklaerung",C.green);
-  fillBox("An der Stelle, wo der Sehnerv das Auge verlaesst, kann das Auge nichts sehen. Das Gehirn fuellt diese Luecke automatisch auf, sodass wir sie im Alltag nie bemerken.",C.surf2,C.green);
-
-  hdr("3g.","Fragen zur Erklaerung",C.blue);
-  renderQuizBlock(saved.quizAnswers[3]);
-
-  hdr("3h.","Fazit",C.purple);
-  answerBox("Zusammenfassung in eigenen Worten:",saved.fazit||"",18);
-  divider();
-
-  // === REFLEXION ===
-  hdr("4.","Reflexion",C.green);
-  const rL={verstanden:"Aufbau des Auges verstanden",spass:"Experiment hat Spass gemacht",schwierig:"Aufgaben gut zu schaffen"};
-  Object.entries(rL).forEach(([k,lbl])=>{
-    chk(9);
-    setT(C.text2,8.5);doc.text(cl(lbl)+":",ML,y);
-    const val=saved.reflect[k]||0;
-    for(let i=0;i<5;i++){
-      setT(i<val?C.orange:C.border,11,false);
-      doc.text(i<val?"*":"o",MR-30+i*7,y);
-    }
+  hd("3e.","Beobachtung",88,166,255);ab("Was habe ich beobachtet?",saved.beob,20);
+  hd("3f.","Erklaerung",63,185,80);
+  fb("An der Stelle, wo der Sehnerv das Auge verlaesst, kann das Auge nichts sehen. Das Gehirn fuellt diese Luecke automatisch auf.",22,27,34,63,185,80,220,230,240);
+  hd("3g.","Fragen zur Erklaerung",88,166,255);qb(saved.qa[3]);
+  hd("3h.","Fazit",210,168,255);ab("Zusammenfassung in eigenen Worten:",saved.fazit,18);div();
+  hd("4.","Reflexion",63,185,80);
+  var rl={v:"Aufbau verstanden",s:"Experiment hat Spass gemacht",c:"Aufgaben gut zu schaffen"};
+  Object.keys(rl).forEach(function(k){
+    chk(9);st(139,148,158,8.5,false);doc.text(rl[k]+":",ML,y);
+    var val=saved.ref[k]||0;
+    for(var i=0;i<5;i++){st(i<val?255:48,i<val?166:54,i<val?87:61,11,false);doc.text(i<val?"*":"o",MR-30+i*7,y);}
     y+=7;
   });
-  if(saved.reflectComment){y+=2;answerBox("Kommentar:",saved.reflectComment,12);}
-
-  // === FOOTER all pages ===
-  const np=doc.getNumberOfPages();
-  for(let p=1;p<=np;p++){
-    doc.setPage(p);
-    setF(C.bg);doc.rect(0,H-10,W,10,"F");
-    setT(C.border,7.5);
+  if(saved.rc){y+=2;ab("Kommentar:",saved.rc,12);}
+  var np=doc.getNumberOfPages();
+  for(var p=1;p<=np;p++){
+    doc.setPage(p);sf(13,17,23);doc.rect(0,H-10,W,10,"F");
+    st(48,54,61,7.5,false);
     doc.text("Sinnesdetektiv - Biologie Klasse 5/6 | mindcraft-fes",ML,H-4);
     doc.text("Seite "+p+" / "+np,MR,H-4,{align:"right"});
   }
-
   doc.save("Sinnesdetektiv_Auge_"+cl(sName).replace(/\s+/g,"_")+"_"+cl(sClass)+".pdf");
 }
 </script>
